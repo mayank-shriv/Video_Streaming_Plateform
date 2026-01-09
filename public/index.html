@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube - Video Streaming Platform</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->
+    <header class="youtube-header">
+        <div class="header-left">
+            <button id="menuBtn" class="icon-btn">
+                <svg viewBox="0 0 24 24" width="24" height="24">
+                    <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z" fill="currentColor"/>
+                </svg>
+            </button>
+            <div class="logo">
+                <svg viewBox="0 0 90 20" width="90" height="20">
+                    <path d="M27.9727 3.12324C27.6435 1.89323 26.6768 0.926623 25.4468 0.597366C23.2197 2.24288e-07 14.285 0 14.285 0C14.285 0 5.35042 2.24288e-07 3.12323 0.597366C1.89323 0.926623 0.926623 1.89323 0.597366 3.12324C2.24288e-07 5.35042 0 10 0 10C0 10 2.24288e-07 14.6496 0.597366 16.8768C0.926623 18.1068 1.89323 19.0734 3.12323 19.4026C5.35042 20 14.285 20 14.285 20C14.285 20 23.2197 20 25.4468 19.4026C26.6768 19.0734 27.6435 18.1068 27.9727 16.8768C28.5701 14.6496 28.5701 10 28.5701 10C28.5701 10 28.5701 5.35042 27.9727 3.12324Z" fill="#FF0000"/>
+                    <path d="M11.4253 14.2854L18.8477 10.0004L11.4253 5.71533V14.2854Z" fill="white"/>
+                </svg>
+                <span class="logo-text">YouTube</span>
+            </div>
+        </div>
+        <div class="header-center">
+            <form id="searchForm" class="search-form">
+                <input type="text" id="searchInput" class="search-input" placeholder="Search">
+                <button type="submit" class="search-btn">
+                    <svg viewBox="0 0 24 24" width="20" height="20">
+                        <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" fill="currentColor"/>
+                    </svg>
+                </button>
+            </form>
+        </div>
+        <div class="header-right">
+            <button id="uploadHeaderBtn" class="icon-btn upload-icon">
+                <svg viewBox="0 0 24 24" width="24" height="24">
+                    <path d="M14,13V17H10V13H7L12,8L17,13M19,3H5C3.89,3 3,3.89 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5C21,3.89 20.1,3 19,3Z" fill="currentColor"/>
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="sidebar">
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" data-view="home">
+                    <svg viewBox="0 0 24 24" width="24" height="24">
+                        <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" fill="currentColor"/>
+                    </svg>
+                    <span>Home</span>
+                </a>
+                <a href="#" class="nav-item" data-view="trending">
+                    <svg viewBox="0 0 24 24" width="24" height="24">
+                        <path d="M17.53 11.2c-.23-.3-.5-.56-.76-.82L19.77 4h-5.23l-2.24 6.37c-.15-.05-.32-.08-.5-.08-.39 0-.74.16-1 .47L6 15h12v-2h-2.47zM10 20c-1.38 0-2.5-1.12-2.5-2.5S8.62 15 10 15s2.5 1.12 2.5 2.5S11.38 20 10 20zm9-12h-2V7h-2v1H9V7H7v1H5V5h14v3zm-5 7c-1.38 0-2.5-1.12-2.5-2.5S12.62 12 14 12s2.5 1.12 2.5 2.5S15.38 17 14 17z" fill="currentColor"/>
+                    </svg>
+                    <span>Trending</span>
+                </a>
+                <a href="#" class="nav-item" id="uploadNavBtn" data-view="upload">
+                    <svg viewBox="0 0 24 24" width="24" height="24">
+                        <path d="M14,13V17H10V13H7L12,8L17,13M19,3H5C3.89,3 3,3.89 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5C21,3.89 20.1,3 19,3Z" fill="currentColor"/>
+                    </svg>
+                    <span>Upload</span>
+                </a>
+                <a href="#" class="nav-item" data-view="library">
+                    <svg viewBox="0 0 24 24" width="24" height="24">
+                        <path d="M4,6H2V20A2,2 0 0,0 4,22H18V20H4M18,7H15V12.5A2.5,2.5 0 0,1 12.5,15A2.5,2.5 0 0,1 10,12.5V7H18M20,2H8A2,2 0 0,0 6,4V16A2,2 0 0,0 8,18H20A2,2 0 0,0 22,16V4A2,2 0 0,0 20,2Z" fill="currentColor"/>
+                    </svg>
+                    <span>Library</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Home View -->
+            <div id="homeView" class="view active">
+                <div id="videoGrid" class="video-grid">
+                    <!-- Videos will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Upload View -->
+            <div id="uploadView" class="view">
+                <div class="upload-container">
+                    <h2>Upload Video</h2>
+                    <form id="uploadForm" class="upload-form">
+                        <div class="form-group">
+                            <label for="videoTitle">Title</label>
+                            <input type="text" id="videoTitle" name="title" required placeholder="Add a title">
+                        </div>
+                        <div class="form-group">
+                            <label for="videoDescription">Description</label>
+                            <textarea id="videoDescription" name="description" rows="6" placeholder="Tell viewers about your video"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="videoFile" class="file-label">
+                                <svg viewBox="0 0 24 24" width="24" height="24">
+                                    <path d="M14,13V17H10V13H7L12,8L17,13M19,3H5C3.89,3 3,3.89 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5C21,3.89 20.1,3 19,3Z" fill="currentColor"/>
+                                </svg>
+                                <span id="fileLabelText">Select video file</span>
+                            </label>
+                            <input type="file" id="videoFile" name="video" accept="video/*" required style="display: none;">
+                            <small>Max file size: 500MB</small>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Upload Video</button>
+                        <div id="uploadProgress" class="upload-progress" style="display: none;">
+                            <div class="progress-bar">
+                                <div id="progressFill" class="progress-fill"></div>
+                            </div>
+                            <p id="progressText">Uploading...</p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Video Player View -->
+            <div id="playerView" class="view">
+                <div class="player-layout">
+                    <div class="player-main">
+                        <video id="videoPlayer" controls>
+                            Your browser does not support the video tag.
+                        </video>
+                        <div class="video-info-section">
+                            <h1 id="playerTitle" class="video-title"></h1>
+                            <div class="video-actions">
+                                <div class="video-stats">
+                                    <span id="playerViews" class="views-count"></span>
+                                    <span class="separator">•</span>
+                                    <span id="playerDate" class="upload-date"></span>
+                                </div>
+                                <div class="action-buttons">
+                                    <button class="action-btn like-btn">
+                                        <svg viewBox="0 0 24 24" width="20" height="20">
+                                            <path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z" fill="currentColor"/>
+                                        </svg>
+                                        <span>Like</span>
+                                    </button>
+                                    <button class="action-btn dislike-btn">
+                                        <svg viewBox="0 0 24 24" width="20" height="20">
+                                            <path d="M15 3H6c-.83 0-1.54.5-1.84 1.22l-3.02 7.05c-.09.23-.14.47-.14.73v2c0 1.1.9 2 2 2h6.31l-.95 4.57-.03.32c0 .41.17.79.44 1.06L9.83 23l6.59-6.59c.36-.36.58-.86.58-1.41V5c0-1.1-.9-2-2-2zm4 0v12h4V3h-4z" fill="currentColor"/>
+                                        </svg>
+                                        <span>Dislike</span>
+                                    </button>
+                                    <button class="action-btn share-btn">
+                                        <svg viewBox="0 0 24 24" width="20" height="20">
+                                            <path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z" fill="currentColor"/>
+                                        </svg>
+                                        <span>Share</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="video-description">
+                                <div class="description-header">
+                                    <span id="playerDescription"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="player-sidebar">
+                        <h3 class="sidebar-title">Up next</h3>
+                        <div id="relatedVideos" class="related-videos">
+                            <!-- Related videos will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+
