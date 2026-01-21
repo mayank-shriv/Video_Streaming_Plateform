@@ -1,98 +1,129 @@
-const express = require('express');
-const mongoose = require('mongoose');
-const cors = require('cors');
-const path = require('path');
-const helmet = require('helmet');
-const morgan = require('morgan');
-const rateLimit = require('express-rate-limit');
-require('dotenv').config();
+/**
+ * server.js
+ * Video Streaming Platform Backend
+ */
 
+const express = require("express");
+const mongoose = require("mongoose");
+const cors = require("cors");
+const path = require("path");
+const helmet = require("helmet");
+const morgan = require("morgan");
+const rateLimit = require("express-rate-limit");
+const dns = require("dns");
+require("dotenv").config();
+
+/* ---------------- DNS FIX (IMPORTANT FOR WINDOWS + ATLAS) ---------------- */
+dns.setDefaultResultOrder("ipv4first");
+
+/* ---------------- APP INIT ---------------- */
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Security and Logging Middleware
-app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      ...helmet.contentSecurityPolicy.getDefaultDirectives(),
-      "img-src": ["'self'", "data:", "https:"],
-      "script-src": ["'self'", "https://fonts.googleapis.com"],
-      "media-src": ["'self'", "blob:", "data:"],
+/* ---------------- SECURITY & CORE MIDDLEWARE ---------------- */
+app.set("trust proxy", 1);
+
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+        "img-src": ["'self'", "data:", "https:"],
+        "script-src": ["'self'", "https://fonts.googleapis.com"],
+        "media-src": ["'self'", "blob:", "data:"],
+      },
     },
-  },
-}));
-app.use(morgan('dev'));
+  })
+);
+
+app.use(morgan("dev"));
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Rate limiting
+/* ---------------- RATE LIMITING ---------------- */
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100 // limit each IP to 100 requests per windowMs
+  windowMs: 15 * 60 * 1000,
+  max: 100,
 });
-app.use('/api/', limiter);
+app.use("/api/", limiter);
 
-app.use(express.static('public'));
+/* ---------------- STATIC FILES ---------------- */
+app.use(express.static(path.join(__dirname, "public")));
 
-// MongoDB Connection
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/videostreaming';
+/* ---------------- MONGOOSE CONFIG ---------------- */
+mongoose.set("strictQuery", true);
 
-mongoose.connect(MONGODB_URI)
-  .then(() => {
-    console.log('✅ Connected to MongoDB successfully');
+const MONGODB_URI =
+  process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/videostreaming";
+
+// Mask password for logs
+const maskedUri = MONGODB_URI.replace(/:([^@]+)@/, ":****@");
+console.log(`📡 Attempting to connect to: ${maskedUri}`);
+
+mongoose
+  .connect(MONGODB_URI, {
+    serverSelectionTimeoutMS: 10000,
+    socketTimeoutMS: 45000,
   })
-  .catch(err => {
-    console.error('❌ MongoDB connection error:', err.message);
+  .then(() => {
+    console.log("✅ Connected to MongoDB successfully");
+  })
+  .catch((err) => {
+    console.error("❌ MongoDB connection error:", err.message);
 
-    if (err.message.includes('authentication failed') || err.message.includes('bad auth')) {
-      console.log('\n🔐 Authentication Failed - Check these:');
-      console.log('   1. Verify your password in .env file is correct');
-      console.log('   2. If password has special characters, URL encode them:');
-      console.log('      @ → %40, # → %23, $ → %24, & → %26, + → %2B, / → %2F');
-      console.log('   3. Make sure the database user exists in MongoDB Atlas');
-      console.log('   4. Check Network Access in Atlas - add your IP (or 0.0.0.0/0 for all)');
-      console.log('   5. Verify username is correct in connection string\n');
-    } else if (err.message.includes('ECONNREFUSED')) {
-      console.log('\n📝 Connection Refused - MongoDB not running:');
-      console.log('   1. For local: Start MongoDB service or run: mongod');
-      console.log('   2. For Atlas: Check network access settings\n');
-    } else {
-      console.log('\n📝 To fix this issue:');
-      console.log('   1. Check your .env file has correct MONGODB_URI');
-      console.log('   2. Verify MongoDB Atlas cluster is running');
-      console.log('   3. Check network access in MongoDB Atlas dashboard\n');
+    if (err.message.includes("ENOTFOUND")) {
+      console.log("\n🧠 ROOT CAUSE:");
+      console.log("   → Invalid MongoDB Atlas hostname");
+      console.log("   → Re-copy SRV string from Atlas > Connect > Drivers\n");
+    }
+
+    if (err.message.includes("authentication failed")) {
+      console.log("🔐 AUTH ERROR:");
+      console.log("   → Wrong username/password");
+      console.log("   → Password not URL-encoded\n");
+    }
+
+    if (err.message.includes("ECONNREFUSED")) {
+      console.log("🚫 CONNECTION REFUSED:");
+      console.log("   → MongoDB not reachable");
+      console.log("   → Check Atlas Network Access (0.0.0.0/0)\n");
     }
   });
 
-// Health check endpoint
-app.get('/api/health', (req, res) => {
-  const mongoose = require('mongoose');
-  const dbStatus = mongoose.connection.readyState;
-  const dbStates = {
-    0: 'disconnected',
-    1: 'connected',
-    2: 'connecting',
-    3: 'disconnecting'
+/* ---------------- HEALTH CHECK ---------------- */
+app.get("/api/health", (req, res) => {
+  const states = {
+    0: "disconnected",
+    1: "connected",
+    2: "connecting",
+    3: "disconnecting",
   };
 
+  const state = mongoose.connection.readyState;
+
   res.json({
-    status: dbStatus === 1 ? 'ok' : 'error',
-    database: dbStates[dbStatus] || 'unknown',
-    message: dbStatus === 1 ? 'MongoDB is connected' : 'MongoDB is not connected'
+    status: state === 1 ? "ok" : "error",
+    database: states[state],
   });
 });
 
-// Routes
-app.use('/api/videos', require('./routes/videoRoutes'));
-app.use('/api/upload', require('./routes/uploadRoutes'));
+/* ---------------- API ROUTES ---------------- */
+app.use("/api/videos", require("./routes/videoRoutes"));
+app.use("/api/upload", require("./routes/uploadRoutes"));
 
-// Serve frontend
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+/* ---------------- FRONTEND FALLBACK ---------------- */
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
+/* ---------------- GLOBAL ERROR HANDLER ---------------- */
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ error: "Internal Server Error" });
+});
+
+/* ---------------- SERVER START ---------------- */
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
-
