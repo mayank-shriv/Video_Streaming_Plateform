@@ -1,5 +1,7 @@
 const API_BASE_URL = '/api';
 
+
+
 // DOM Elements
 const homeView = document.getElementById('homeView');
 const uploadView = document.getElementById('uploadView');
