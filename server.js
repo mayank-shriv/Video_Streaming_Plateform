@@ -33,6 +33,8 @@ app.use(
         "media-src": ["'self'", "blob:", "data:"],
       },
     },
+    crossOriginEmbedderPolicy: false,
+    crossOriginResourcePolicy: { policy: "cross-origin" },
   })
 );
 

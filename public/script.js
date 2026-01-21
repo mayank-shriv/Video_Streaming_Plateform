@@ -188,8 +188,20 @@ async function playVideo(videoId) {
 
         // Set video source and handle errors
         videoPlayer.onerror = () => {
-            console.error('Error loading video file');
-            alert('Error loading video. The video file may be corrupted or missing.');
+            const error = videoPlayer.error;
+            let errorMessage = 'Error loading video. The video file may be corrupted or missing.';
+
+            if (error) {
+                switch (error.code) {
+                    case 1: errorMessage = 'Video loading aborted.'; break;
+                    case 2: errorMessage = 'Network error while loading video.'; break;
+                    case 3: errorMessage = 'Video decoding failed. The file might be corrupted.'; break;
+                    case 4: errorMessage = 'Video format not supported or file not found.'; break;
+                }
+                console.error(`Video Error: ${error.code} - ${error.message}`);
+            }
+
+            alert(errorMessage);
         };
 
         videoPlayer.onloadeddata = () => {
