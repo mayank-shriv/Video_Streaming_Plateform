@@ -38,11 +38,11 @@ navItems.forEach(item => {
     item.addEventListener('click', (e) => {
         e.preventDefault();
         const view = item.getAttribute('data-view');
-        
+
         // Update active state
         navItems.forEach(nav => nav.classList.remove('active'));
         item.classList.add('active');
-        
+
         showView(view);
     });
 });
@@ -78,9 +78,15 @@ function showView(viewName) {
     uploadView.classList.remove('active');
     playerView.classList.remove('active');
 
-    if (viewName === 'home' || viewName === 'trending' || viewName === 'library') {
+    if (viewName === 'home') {
         homeView.classList.add('active');
         loadVideos();
+    } else if (viewName === 'trending') {
+        homeView.classList.add('active');
+        loadVideos('trending');
+    } else if (viewName === 'library') {
+        homeView.classList.add('active');
+        loadVideos('oldest'); // Library shows oldest (original) first as a placeholder logic
     } else if (viewName === 'upload') {
         uploadView.classList.add('active');
     } else if (viewName === 'player') {
@@ -88,17 +94,18 @@ function showView(viewName) {
     }
 }
 
-// Load all videos
-async function loadVideos() {
+// Load all videos with optional sorting
+async function loadVideos(sort = '') {
     try {
         videoGrid.innerHTML = '<div class="loading">Loading videos...</div>';
-        const response = await fetch(`${API_BASE_URL}/videos`);
-        
+        const url = sort ? `${API_BASE_URL}/videos?sort=${sort}` : `${API_BASE_URL}/videos`;
+        const response = await fetch(url);
+
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
             throw new Error(errorData.error || `HTTP ${response.status}`);
         }
-        
+
         allVideos = await response.json();
         console.log('Loaded videos:', allVideos);
 
@@ -116,7 +123,7 @@ async function loadVideos() {
 
 // Filter videos
 function filterVideos(query) {
-    const filtered = allVideos.filter(video => 
+    const filtered = allVideos.filter(video =>
         video.title.toLowerCase().includes(query) ||
         (video.description && video.description.toLowerCase().includes(query))
     );
@@ -136,11 +143,11 @@ function displayVideos(videos) {
 function createVideoCard(video) {
     const card = document.createElement('div');
     card.className = 'video-card';
-    
+
     const channelInitial = video.title.charAt(0).toUpperCase();
     const viewsText = formatViews(video.views);
     const timeAgo = getTimeAgo(video.uploadDate);
-    
+
     card.innerHTML = `
         <div class="video-thumbnail">
             <span>▶</span>
@@ -149,7 +156,7 @@ function createVideoCard(video) {
             <div class="channel-avatar">${channelInitial}</div>
             <div class="video-details">
                 <h3>${escapeHtml(video.title)}</h3>
-                <div class="channel-name">Video Channel</div>
+                <div class="channel-name">${escapeHtml(video.title.split(' ')[0])} Media</div>
                 <div class="video-meta">
                     <span>${viewsText}</span>
                     <span>•</span>
@@ -167,37 +174,81 @@ async function playVideo(videoId) {
     try {
         currentVideoId = videoId;
         const response = await fetch(`${API_BASE_URL}/videos/${videoId}`);
-        
+
         if (!response.ok) {
             throw new Error('Video not found');
         }
-        
+
         const video = await response.json();
 
         playerTitle.textContent = video.title;
         playerDescription.textContent = video.description || 'No description available.';
         playerViews.textContent = formatViews(video.views) + ' views';
         playerDate.textContent = getTimeAgo(video.uploadDate);
-        
+
         // Set video source and handle errors
         videoPlayer.onerror = () => {
             console.error('Error loading video file');
             alert('Error loading video. The video file may be corrupted or missing.');
         };
-        
+
         videoPlayer.onloadeddata = () => {
             console.log('Video loaded successfully');
         };
-        
+
         videoPlayer.src = `${API_BASE_URL}/videos/${videoId}/stream`;
         showView('player');
-        
+
+        // Add Delete Button if it doesn't exist
+        setupPlayerActions(videoId);
+
         // Load related videos
         loadRelatedVideos(videoId);
     } catch (error) {
         console.error('Error loading video:', error);
         alert('Error loading video. Please try again.');
     }
+}
+
+function setupPlayerActions(videoId) {
+    const actionButtons = document.querySelector('.action-buttons');
+    let deleteBtn = document.getElementById('deleteVideoBtn');
+
+    if (!deleteBtn) {
+        deleteBtn = document.createElement('button');
+        deleteBtn.id = 'deleteVideoBtn';
+        deleteBtn.className = 'action-btn delete-btn';
+        deleteBtn.innerHTML = `
+            <svg viewBox="0 0 24 24" width="20" height="20">
+                <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" fill="currentColor"/>
+            </svg>
+            <span>Delete</span>
+        `;
+        actionButtons.appendChild(deleteBtn);
+    }
+
+    // Remove old listeners
+    const newDeleteBtn = deleteBtn.cloneNode(true);
+    deleteBtn.parentNode.replaceChild(newDeleteBtn, deleteBtn);
+
+    newDeleteBtn.addEventListener('click', async () => {
+        if (confirm('Are you sure you want to delete this video?')) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/videos/${videoId}`, {
+                    method: 'DELETE'
+                });
+                if (response.ok) {
+                    alert('Video deleted successfully');
+                    showView('home');
+                } else {
+                    const data = await response.json();
+                    alert(`Error: ${data.error}`);
+                }
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+            }
+        }
+    });
 }
 
 // Load related videos
@@ -213,20 +264,20 @@ async function loadRelatedVideos(excludeId) {
 // Display related videos
 function displayRelatedVideos(videos) {
     relatedVideos.innerHTML = '';
-    
+
     if (videos.length === 0) {
         relatedVideos.innerHTML = '<div class="loading">No related videos</div>';
         return;
     }
-    
+
     videos.forEach(video => {
         const card = document.createElement('div');
         card.className = 'related-video-card';
-        
+
         const channelInitial = video.title.charAt(0).toUpperCase();
         const viewsText = formatViews(video.views);
         const timeAgo = getTimeAgo(video.uploadDate);
-        
+
         card.innerHTML = `
             <div class="related-thumbnail">
                 <span>▶</span>
@@ -234,7 +285,7 @@ function displayRelatedVideos(videos) {
             <div class="related-info">
                 <h4>${escapeHtml(video.title)}</h4>
                 <div class="related-meta">
-                    <div>Video Channel</div>
+                    <div>${escapeHtml(video.title.split(' ')[0])} Media</div>
                     <div>${viewsText} • ${timeAgo}</div>
                 </div>
             </div>
@@ -329,7 +380,7 @@ function getTimeAgo(dateString) {
     const date = new Date(dateString);
     const now = new Date();
     const diffInSeconds = Math.floor((now - date) / 1000);
-    
+
     if (diffInSeconds < 60) {
         return 'just now';
     } else if (diffInSeconds < 3600) {

@@ -492,6 +492,15 @@ body {
     background: #e5e5e5;
 }
 
+.action-btn.delete-btn:hover {
+    background: #ffebee;
+    color: #cc0000;
+}
+
+.action-btn.delete-btn:hover svg {
+    color: #cc0000;
+}
+
 .action-btn svg {
     color: #606060;
 }

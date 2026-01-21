@@ -7,40 +7,40 @@ const path = require('path');
 // Get all videos
 router.get('/', async (req, res) => {
   try {
+    const { sort, search } = req.query;
+
     // Check if MongoDB is connected
-    const mongoose = require('mongoose');
     if (mongoose.connection.readyState !== 1) {
-      return res.status(503).json({ 
+      return res.status(503).json({
         error: 'Database not connected',
         videos: []
       });
     }
-    
-    const videos = await Video.find().sort({ uploadDate: -1 });
-    
-    // Filter out videos with missing files
-    const validVideos = [];
-    const orphanedIds = [];
-    
-    for (const video of videos) {
-      const videoPath = path.join(__dirname, '..', video.path);
-      if (fs.existsSync(videoPath)) {
-        validVideos.push(video);
-      } else {
-        orphanedIds.push(video._id);
-        console.log(`Found orphaned video: ${video._id} - file missing: ${video.path}`);
-      }
+
+    let query = {};
+    if (search) {
+      query.$or = [
+        { title: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } }
+      ];
     }
-    
-    // Auto-cleanup orphaned videos (optional - can be disabled)
-    if (orphanedIds.length > 0) {
-      console.log(`Cleaning up ${orphanedIds.length} orphaned video records...`);
-      await Video.deleteMany({ _id: { $in: orphanedIds } });
-      console.log(`Cleaned up ${orphanedIds.length} orphaned videos`);
+
+    let sortOptions = { uploadDate: -1 };
+    if (sort === 'trending') {
+      sortOptions = { views: -1, uploadDate: -1 };
+    } else if (sort === 'oldest') {
+      sortOptions = { uploadDate: 1 };
+    } else if (sort === 'alphabetical') {
+      sortOptions = { title: 1 };
     }
-    
-    console.log(`Found ${validVideos.length} valid videos in database`);
-    res.json(validVideos);
+
+    const videos = await Video.find(query).sort(sortOptions);
+
+    // Instead of deleting, we just flag or skip missing files if necessary, 
+    // but for now, we'll return all records and handle UI-side.
+    // Auto-cleanup removed for reliability.
+
+    res.json(videos);
   } catch (error) {
     console.error('Error fetching videos:', error);
     res.status(500).json({ error: error.message });
@@ -54,11 +54,11 @@ router.get('/:id', async (req, res) => {
     if (!video) {
       return res.status(404).json({ error: 'Video not found' });
     }
-    
+
     // Increment views
     video.views += 1;
     await video.save();
-    
+
     res.json(video);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -74,7 +74,7 @@ router.get('/:id/stream', async (req, res) => {
     }
 
     const videoPath = path.join(__dirname, '..', video.path);
-    
+
     if (!fs.existsSync(videoPath)) {
       return res.status(404).json({ error: 'Video file not found' });
     }
@@ -145,7 +145,7 @@ router.post('/cleanup', async (req, res) => {
 
     const videos = await Video.find();
     const orphanedIds = [];
-    
+
     for (const video of videos) {
       const videoPath = path.join(__dirname, '..', video.path);
       if (!fs.existsSync(videoPath)) {
@@ -155,12 +155,12 @@ router.post('/cleanup', async (req, res) => {
 
     if (orphanedIds.length > 0) {
       await Video.deleteMany({ _id: { $in: orphanedIds } });
-      res.json({ 
+      res.json({
         message: `Cleaned up ${orphanedIds.length} orphaned video records`,
         deleted: orphanedIds.length
       });
     } else {
-      res.json({ 
+      res.json({
         message: 'No orphaned videos found',
         deleted: 0
       });
