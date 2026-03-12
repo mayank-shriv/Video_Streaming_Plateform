@@ -4,6 +4,10 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const Video = require('../models/Video');
+const { auth } = require('../middleware/auth');
+const asyncHandler = require('../middleware/asyncHandler');
+const { validateVideoUpload, validateFileUpload } = require('../middleware/validation');
+const AppError = require('../utils/AppError');
 
 // Ensure uploads directory exists
 const uploadsDir = path.join(__dirname, '..', 'uploads', 'videos');
@@ -40,23 +44,21 @@ const upload = multer({
 });
 
 // Upload video
-router.post('/', upload.single('video'), async (req, res) => {
-  try {
-    if (!req.file) {
-      return res.status(400).json({ error: 'No video file uploaded' });
-    }
+router.post('/',
+  auth,
+  upload.single('video'),
+  validateFileUpload,
+  validateVideoUpload,
+  asyncHandler(async (req, res) => {
+    const mongoose = require('mongoose');
 
     // Check if MongoDB is connected
-    const mongoose = require('mongoose');
     if (mongoose.connection.readyState !== 1) {
       // Delete uploaded file if MongoDB is not connected
-      const filePath = req.file.path;
-      if (fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath);
+      if (req.file && fs.existsSync(req.file.path)) {
+        fs.unlinkSync(req.file.path);
       }
-      return res.status(503).json({ 
-        error: 'Database not connected. Please check MongoDB connection and try again.' 
-      });
+      throw AppError.internal('Database not connected. Please check MongoDB connection and try again.');
     }
 
     // Handle title and description - ensure they are strings, not arrays
@@ -65,35 +67,38 @@ router.post('/', upload.single('video'), async (req, res) => {
       title = title[0] || req.file.originalname;
     }
     title = title || req.file.originalname;
-    
+
     let description = req.body.description;
     if (Array.isArray(description)) {
       description = description[0] || '';
     }
     description = description || '';
 
-    const video = new Video({
-      title: String(title).trim(),
-      description: String(description).trim(),
-      filename: req.file.filename,
-      originalName: req.file.originalname,
-      path: path.relative(path.join(__dirname, '..'), req.file.path),
-      size: req.file.size,
-      mimetype: req.file.mimetype
-    });
+    try {
+      const video = new Video({
+        title: String(title).trim(),
+        description: String(description).trim(),
+        filename: req.file.filename,
+        originalName: req.file.originalname,
+        path: path.relative(path.join(__dirname, '..'), req.file.path),
+        size: req.file.size,
+        mimetype: req.file.mimetype,
+        uploader: req.user._id
+      });
 
-    await video.save();
-    console.log('Video saved to database:', video._id);
-    res.status(201).json(video);
-  } catch (error) {
-    console.error('Upload error:', error);
-    // Delete uploaded file if save failed
-    if (req.file && fs.existsSync(req.file.path)) {
-      fs.unlinkSync(req.file.path);
+      await video.save();
+      console.log('Video saved to database:', video._id);
+      res.status(201).json(video);
+    } catch (error) {
+      // Delete uploaded file if save failed
+      if (req.file && fs.existsSync(req.file.path)) {
+        fs.unlinkSync(req.file.path);
+      }
+      throw error;
     }
-    res.status(500).json({ error: error.message });
-  }
-});
+  })
+);
 
 module.exports = router;
+
 

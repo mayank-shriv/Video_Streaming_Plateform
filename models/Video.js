@@ -40,6 +40,11 @@ const videoSchema = new mongoose.Schema({
   uploadDate: {
     type: Date,
     default: Date.now
+  },
+  uploader: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: false // Optional for backward compatibility with existing videos
   }
 });
 

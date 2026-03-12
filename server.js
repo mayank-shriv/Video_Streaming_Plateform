@@ -10,6 +10,7 @@ const path = require("path");
 const helmet = require("helmet");
 const morgan = require("morgan");
 const rateLimit = require("express-rate-limit");
+const compression = require("compression");
 const dns = require("dns");
 require("dotenv").config();
 
@@ -29,7 +30,9 @@ app.use(
       directives: {
         ...helmet.contentSecurityPolicy.getDefaultDirectives(),
         "img-src": ["'self'", "data:", "https:"],
-        "script-src": ["'self'", "https://fonts.googleapis.com"],
+        "script-src": ["'self'"],
+        "style-src": ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+        "font-src": ["'self'", "https://fonts.gstatic.com"],
         "media-src": ["'self'", "blob:", "data:"],
       },
     },
@@ -38,6 +41,9 @@ app.use(
   })
 );
 
+// Compression middleware for better performance
+app.use(compression());
+
 app.use(morgan("dev"));
 app.use(cors());
 app.use(express.json());
@@ -45,8 +51,9 @@ app.use(express.urlencoded({ extended: true }));
 
 /* ---------------- RATE LIMITING ---------------- */
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 100,
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+  message: { error: 'Too many requests, please try again later.' }
 });
 app.use("/api/", limiter);
 
@@ -107,10 +114,13 @@ app.get("/api/health", (req, res) => {
   res.json({
     status: state === 1 ? "ok" : "error",
     database: states[state],
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString()
   });
 });
 
 /* ---------------- API ROUTES ---------------- */
+app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/videos", require("./routes/videoRoutes"));
 app.use("/api/upload", require("./routes/uploadRoutes"));
 
@@ -119,13 +129,12 @@ app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
-/* ---------------- GLOBAL ERROR HANDLER ---------------- */
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ error: "Internal Server Error" });
-});
+/* ---------------- ERROR HANDLER ---------------- */
+const errorHandler = require("./middleware/errorHandler");
+app.use(errorHandler);
 
 /* ---------------- SERVER START ---------------- */
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
+
