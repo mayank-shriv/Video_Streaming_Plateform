@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sign In — ViewTube</title>
+    <meta name="description" content="Sign in to ViewTube to upload, share, and discover videos from creators worldwide." />
+    <link rel="stylesheet" href="css/global.css" />
+    <link rel="stylesheet" href="css/auth.css" />
+</head>
+<body>
+    <div class="auth-page">
+        <div class="auth-page__bg"></div>
+
+        <div class="auth-card">
+            <a href="/index.html" class="auth-card__logo">
+                <div class="auth-card__logo-icon">
+                    <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                </div>
+                <span>ViewTube</span>
+            </a>
+
+            <div class="auth-card__header">
+                <h1>Welcome Back</h1>
+                <p>Sign in to continue to ViewTube</p>
+            </div>
+
+            <div class="auth-alert" id="login-alert"></div>
+
+            <form id="login-form" class="auth-card__form" novalidate>
+                <div class="input-group">
+                    <label for="login-identifier">Username or Email</label>
+                    <input type="text" id="login-identifier" placeholder="Enter your username or email" autocomplete="username" required />
+                    <div class="input-error">Please enter your username or email</div>
+                </div>
+
+                <div class="input-group">
+                    <label for="login-password">Password</label>
+                    <div class="input-password-wrapper">
+                        <input type="password" id="login-password" placeholder="Enter your password" autocomplete="current-password" required />
+                        <button type="button" class="input-password-toggle" id="toggle-password" aria-label="Toggle password visibility">
+                            <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        </button>
+                    </div>
+                    <div class="input-error">Please enter your password</div>
+                </div>
+
+                <button type="submit" class="btn btn-primary auth-card__submit" id="login-submit">
+                    Sign In
+                </button>
+            </form>
+
+            <div class="auth-card__footer">
+                Don't have an account? <a href="/register.html">Create one</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/auth.js"></script>
+    <script src="js/api.js"></script>
+    <script>
+        // Redirect if already logged in
+        Auth.redirectIfLoggedIn('/home.html');
+
+        const form = document.getElementById('login-form');
+        const alertEl = document.getElementById('login-alert');
+        const submitBtn = document.getElementById('login-submit');
+        const identifierInput = document.getElementById('login-identifier');
+        const passwordInput = document.getElementById('login-password');
+        const togglePassword = document.getElementById('toggle-password');
+
+        // Password visibility toggle
+        togglePassword.addEventListener('click', () => {
+            const isPassword = passwordInput.type === 'password';
+            passwordInput.type = isPassword ? 'text' : 'password';
+            togglePassword.innerHTML = isPassword
+                ? `<svg viewBox="0 0 24 24"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`
+                : `<svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
+        });
+
+        // Show alert
+        function showAlert(message, type = 'error') {
+            alertEl.textContent = message;
+            alertEl.className = `auth-alert ${type}`;
+        }
+
+        function hideAlert() {
+            alertEl.className = 'auth-alert';
+        }
+
+        // Form submission
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            hideAlert();
+
+            const identifier = identifierInput.value.trim();
+            const password = passwordInput.value;
+
+            // Validation
+            let hasError = false;
+            if (!identifier) {
+                identifierInput.closest('.input-group').classList.add('error');
+                hasError = true;
+            } else {
+                identifierInput.closest('.input-group').classList.remove('error');
+            }
+            if (!password) {
+                passwordInput.closest('.input-group').classList.add('error');
+                hasError = true;
+            } else {
+                passwordInput.closest('.input-group').classList.remove('error');
+            }
+            if (hasError) return;
+
+            // Determine if identifier is email or username
+            const isEmail = identifier.includes('@');
+            const body = {
+                password,
+                ...(isEmail ? { email: identifier } : { username: identifier })
+            };
+
+            // Submit
+            submitBtn.classList.add('loading');
+            submitBtn.innerHTML = '<div class="spinner"></div>';
+
+            try {
+                const data = await api.post('/user/login', body);
+                Auth.setUser(data.data.user);
+                showAlert('Login successful! Redirecting...', 'success');
+                setTimeout(() => {
+                    window.location.href = '/home.html';
+                }, 800);
+            } catch (error) {
+                showAlert(error.message || 'Login failed. Please try again.');
+                submitBtn.classList.remove('loading');
+                submitBtn.textContent = 'Sign In';
+            }
+        });
+
+        // Clear errors on input
+        [identifierInput, passwordInput].forEach(input => {
+            input.addEventListener('input', () => {
+                input.closest('.input-group').classList.remove('error');
+                hideAlert();
+            });
+        });
+    </script>
+</body>
+</html>

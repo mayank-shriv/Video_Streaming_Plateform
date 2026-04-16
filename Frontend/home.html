@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Home — ViewTube</title>
+    <meta name="description" content="Discover and watch amazing videos on ViewTube. Your personalized video feed awaits." />
+    <link rel="stylesheet" href="css/global.css" />
+    <style>
+        /* ── HOME PAGE STYLES ───────────────────── */
+        .home-chips {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+            margin-bottom: 28px;
+            scrollbar-width: none;
+        }
+        .home-chips::-webkit-scrollbar { display: none; }
+
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .video-card {
+            display: block;
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+            text-decoration: none;
+            color: inherit;
+        }
+        .video-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .video-card__thumbnail {
+            position: relative;
+            aspect-ratio: 16 / 9;
+            overflow: hidden;
+            background: var(--bg-tertiary);
+        }
+        .video-card__thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform var(--transition-normal);
+        }
+        .video-card:hover .video-card__thumbnail img {
+            transform: scale(1.05);
+        }
+
+        .video-card__duration {
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
+            background: rgba(0, 0, 0, 0.85);
+            color: #fff;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .video-card__play-overlay {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.3);
+            opacity: 0;
+            transition: opacity var(--transition-fast);
+        }
+        .video-card:hover .video-card__play-overlay {
+            opacity: 1;
+        }
+
+        .video-card__play-btn {
+            width: 52px;
+            height: 52px;
+            background: var(--accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 20px rgba(255, 68, 68, 0.5);
+            transform: scale(0.8);
+            transition: transform var(--transition-normal);
+        }
+        .video-card:hover .video-card__play-btn {
+            transform: scale(1);
+        }
+        .video-card__play-btn svg {
+            width: 22px;
+            height: 22px;
+            fill: #fff;
+            margin-left: 3px;
+        }
+
+        .video-card__info {
+            display: flex;
+            gap: 12px;
+            padding: 12px 4px;
+        }
+
+        .video-card__avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            object-fit: cover;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .video-card__meta {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .video-card__title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            line-height: 1.3;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            margin-bottom: 4px;
+        }
+
+        .video-card__channel {
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+            transition: color var(--transition-fast);
+        }
+        .video-card__channel:hover {
+            color: var(--text-primary);
+        }
+
+        .video-card__stats {
+            display: flex;
+            gap: 6px;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .home-welcome {
+            margin-bottom: 32px;
+            animation: fadeInUp 0.6s ease forwards;
+        }
+        .home-welcome h2 {
+            font-size: 1.5rem;
+            margin-bottom: 6px;
+        }
+        .home-welcome p {
+            font-size: 0.9rem;
+        }
+
+        /* Skeleton video cards */
+        .video-card-skeleton .video-card__thumbnail {
+            aspect-ratio: 16/9;
+        }
+        .video-card-skeleton .skeleton-title {
+            height: 16px;
+            width: 80%;
+            margin-bottom: 8px;
+        }
+        .video-card-skeleton .skeleton-sub {
+            height: 12px;
+            width: 50%;
+        }
+        .video-card-skeleton .skeleton-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+        }
+
+        @media (max-width: 768px) {
+            .video-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        @media (min-width: 769px) and (max-width: 1200px) {
+            .video-grid {
+                grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <script src="js/auth.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/components.js"></script>
+
+    <script>
+        // Require authentication
+        if (!Auth.requireAuth()) {
+            // requireAuth redirects to login
+        } else {
+            // Render layout
+            renderNavbar();
+            renderSidebar('home');
+
+            // Create main content
+            const main = document.createElement('main');
+            main.className = 'main-content';
+            main.id = 'main-content';
+            document.body.appendChild(main);
+
+            // Welcome
+            const user = Auth.getUser();
+            const welcome = document.createElement('div');
+            welcome.className = 'home-welcome';
+            welcome.innerHTML = `
+                <h2>Welcome back${user?.fullname ? ', ' + user.fullname.split(' ')[0] : ''} 👋</h2>
+                <p>Here's what's trending on ViewTube today</p>
+            `;
+            main.appendChild(welcome);
+
+            // Category chips
+            const categories = ['All', 'Music', 'Gaming', 'Tech', 'Education', 'Entertainment', 'Sports', 'News', 'Science', 'Art'];
+            const chipsContainer = document.createElement('div');
+            chipsContainer.className = 'home-chips';
+            categories.forEach((cat, i) => {
+                const chip = document.createElement('button');
+                chip.className = `chip ${i === 0 ? 'active' : ''}`;
+                chip.textContent = cat;
+                chip.addEventListener('click', () => {
+                    chipsContainer.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+                    chip.classList.add('active');
+                });
+                chipsContainer.appendChild(chip);
+            });
+            main.appendChild(chipsContainer);
+
+            // Video grid — show skeletons first
+            const grid = document.createElement('div');
+            grid.className = 'video-grid';
+            grid.id = 'video-grid';
+
+            // Show loading skeletons
+            for (let i = 0; i < 8; i++) {
+                const skel = document.createElement('div');
+                skel.className = 'video-card-skeleton';
+                skel.innerHTML = `
+                    <div class="video-card__thumbnail skeleton"></div>
+                    <div class="video-card__info" style="padding: 12px 4px;">
+                        <div class="skeleton-avatar skeleton"></div>
+                        <div class="video-card__meta">
+                            <div class="skeleton-title skeleton"></div>
+                            <div class="skeleton-sub skeleton"></div>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(skel);
+            }
+            main.appendChild(grid);
+
+            // Load videos after short delay (simulate API call, using mock data)
+            setTimeout(() => {
+                grid.innerHTML = '';
+                MOCK_VIDEOS.forEach(video => {
+                    grid.appendChild(createVideoCard(video));
+                });
+
+                // Animate cards in
+                grid.querySelectorAll('.video-card').forEach((card, i) => {
+                    card.style.opacity = '0';
+                    card.style.animation = `fadeInUp 0.4s ease ${i * 0.05}s forwards`;
+                });
+            }, 800);
+        }
+    </script>
+</body>
+</html>

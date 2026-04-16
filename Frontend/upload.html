@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Upload Video — ViewTube</title>
+    <meta name="description" content="Upload your video to ViewTube and share it with the world." />
+    <link rel="stylesheet" href="css/global.css" />
+    <link rel="stylesheet" href="css/auth.css" />
+    <style>
+        .upload-page {
+            max-width: 800px;
+            margin: 0 auto;
+            animation: fadeInUp 0.5s ease forwards;
+        }
+        .upload-page__header {
+            margin-bottom: 32px;
+        }
+        .upload-page__header h1 {
+            font-size: 1.6rem;
+            margin-bottom: 6px;
+        }
+        .upload-page__header p {
+            font-size: 0.9rem;
+        }
+
+        /* ── UPLOAD CARD ───────────────────── */
+        .upload-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            padding: 32px;
+        }
+
+        /* ── LARGE DROP ZONE ───────────────── */
+        .drop-zone {
+            border: 2px dashed var(--border);
+            border-radius: var(--radius-lg);
+            padding: 60px 32px;
+            text-align: center;
+            cursor: pointer;
+            transition: all var(--transition-normal);
+            margin-bottom: 28px;
+        }
+        .drop-zone:hover,
+        .drop-zone.drag-over {
+            border-color: var(--accent);
+            background: rgba(255, 68, 68, 0.04);
+        }
+        .drop-zone__icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 16px;
+            color: var(--text-muted);
+        }
+        .drop-zone__icon svg {
+            width: 100%;
+            height: 100%;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 1.5;
+        }
+        .drop-zone__title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+        .drop-zone__hint {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+        .drop-zone input[type="file"] { display: none; }
+
+        /* ── VIDEO PREVIEW ─────────────────── */
+        .video-selected {
+            display: none;
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-lg);
+            padding: 16px;
+            margin-bottom: 24px;
+            animation: fadeIn 0.3s ease;
+        }
+        .video-selected.visible { display: flex; gap: 14px; align-items: center; }
+        .video-selected__icon {
+            width: 44px;
+            height: 44px;
+            background: rgba(255, 68, 68, 0.12);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .video-selected__icon svg {
+            width: 22px;
+            height: 22px;
+            stroke: var(--accent);
+            fill: none;
+            stroke-width: 2;
+        }
+        .video-selected__info { flex: 1; min-width: 0; }
+        .video-selected__name {
+            font-weight: 600;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .video-selected__size {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+        .video-selected__remove {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background var(--transition-fast);
+            color: var(--text-muted);
+        }
+        .video-selected__remove:hover { background: var(--bg-hover); color: var(--accent); }
+
+        /* ── THUMBNAIL UPLOAD ──────────────── */
+        .thumbnail-section {
+            margin-bottom: 24px;
+        }
+        .thumbnail-section label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+        .thumbnail-drop {
+            border: 2px dashed var(--border);
+            border-radius: var(--radius-md);
+            padding: 24px;
+            text-align: center;
+            cursor: pointer;
+            transition: all var(--transition-normal);
+        }
+        .thumbnail-drop:hover { border-color: var(--accent); }
+        .thumbnail-drop input[type="file"] { display: none; }
+        .thumbnail-preview {
+            display: none;
+            position: relative;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            margin-top: 8px;
+        }
+        .thumbnail-preview.visible { display: block; }
+        .thumbnail-preview img {
+            width: 100%;
+            max-height: 200px;
+            object-fit: cover;
+        }
+        .thumbnail-preview__remove {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #fff;
+            font-size: 0.9rem;
+        }
+        .thumbnail-preview__remove:hover { background: var(--accent); }
+
+        /* ── PROGRESS BAR ──────────────────── */
+        .upload-progress {
+            display: none;
+            margin-top: 20px;
+        }
+        .upload-progress.visible { display: block; }
+        .upload-progress__bar {
+            height: 6px;
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-full);
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+        .upload-progress__fill {
+            height: 100%;
+            width: 0%;
+            background: var(--accent-gradient);
+            border-radius: var(--radius-full);
+            transition: width 0.3s ease;
+        }
+        .upload-progress__text {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .upload-card { padding: 20px; }
+            .drop-zone { padding: 40px 20px; }
+        }
+    </style>
+</head>
+<body>
+    <script src="js/auth.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/components.js"></script>
+    <script>
+        if (!Auth.requireAuth()) { /* redirects */ }
+        else {
+            renderNavbar();
+            renderSidebar('upload');
+
+            const main = document.createElement('main');
+            main.className = 'main-content';
+            document.body.appendChild(main);
+
+            main.innerHTML = `
+                <div class="upload-page">
+                    <div class="upload-page__header">
+                        <h1>Upload Video</h1>
+                        <p>Share your content with the ViewTube community</p>
+                    </div>
+
+                    <div class="upload-card">
+                        <!-- Drop Zone -->
+                        <div class="drop-zone" id="video-drop-zone">
+                            <div class="drop-zone__icon">
+                                <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                            </div>
+                            <div class="drop-zone__title">Drag and drop your video here</div>
+                            <div class="drop-zone__hint">MP4, WebM, or MOV — Max 500MB</div>
+                            <button class="btn btn-secondary" style="margin-top: 8px;" onclick="document.getElementById('video-file-input').click()">Select File</button>
+                            <input type="file" id="video-file-input" accept="video/*" />
+                        </div>
+
+                        <!-- Selected Video -->
+                        <div class="video-selected" id="video-selected">
+                            <div class="video-selected__icon">
+                                <svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/></svg>
+                            </div>
+                            <div class="video-selected__info">
+                                <div class="video-selected__name" id="selected-video-name"></div>
+                                <div class="video-selected__size" id="selected-video-size"></div>
+                            </div>
+                            <div class="video-selected__remove" id="remove-video" title="Remove">✕</div>
+                        </div>
+
+                        <!-- Details Form -->
+                        <form id="upload-form">
+                            <div class="input-group">
+                                <label for="video-title">Title *</label>
+                                <input type="text" id="video-title" placeholder="Give your video a catchy title" maxlength="100" required />
+                            </div>
+
+                            <div class="input-group">
+                                <label for="video-description">Description</label>
+                                <textarea id="video-description" rows="4" placeholder="Tell viewers about your video..." style="resize: vertical;"></textarea>
+                            </div>
+
+                            <!-- Thumbnail -->
+                            <div class="thumbnail-section">
+                                <label>Thumbnail</label>
+                                <div class="thumbnail-drop" id="thumbnail-drop" onclick="document.getElementById('thumbnail-input').click()">
+                                    <div style="font-size: 0.9rem; color: var(--text-secondary);">Click to upload thumbnail</div>
+                                    <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 4px;">JPG or PNG, 1280×720 recommended</div>
+                                    <input type="file" id="thumbnail-input" accept="image/*" />
+                                </div>
+                                <div class="thumbnail-preview" id="thumbnail-preview">
+                                    <img id="thumbnail-preview-img" alt="Thumbnail preview" />
+                                    <div class="thumbnail-preview__remove" id="thumbnail-remove">✕</div>
+                                </div>
+                            </div>
+
+                            <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                                <a href="/home.html" class="btn btn-secondary">Cancel</a>
+                                <button type="submit" class="btn btn-primary" id="upload-submit">
+                                    ${Icons.upload}
+                                    Publish Video
+                                </button>
+                            </div>
+                        </form>
+
+                        <!-- Progress -->
+                        <div class="upload-progress" id="upload-progress">
+                            <div class="upload-progress__bar">
+                                <div class="upload-progress__fill" id="progress-fill"></div>
+                            </div>
+                            <div class="upload-progress__text" id="progress-text">Uploading... 0%</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // ── VIDEO FILE HANDLING ──────────
+            const dropZone = document.getElementById('video-drop-zone');
+            const videoInput = document.getElementById('video-file-input');
+            const videoSelected = document.getElementById('video-selected');
+            let selectedVideoFile = null;
+
+            dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+            dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+            dropZone.addEventListener('drop', e => {
+                e.preventDefault();
+                dropZone.classList.remove('drag-over');
+                if (e.dataTransfer.files.length) {
+                    selectVideoFile(e.dataTransfer.files[0]);
+                }
+            });
+            videoInput.addEventListener('change', () => {
+                if (videoInput.files.length) selectVideoFile(videoInput.files[0]);
+            });
+
+            function selectVideoFile(file) {
+                selectedVideoFile = file;
+                document.getElementById('selected-video-name').textContent = file.name;
+                document.getElementById('selected-video-size').textContent = (file.size / (1024 * 1024)).toFixed(1) + ' MB';
+                videoSelected.classList.add('visible');
+                dropZone.style.display = 'none';
+            }
+
+            document.getElementById('remove-video').addEventListener('click', () => {
+                selectedVideoFile = null;
+                videoInput.value = '';
+                videoSelected.classList.remove('visible');
+                dropZone.style.display = '';
+            });
+
+            // ── THUMBNAIL HANDLING ───────────
+            const thumbInput = document.getElementById('thumbnail-input');
+            const thumbPreview = document.getElementById('thumbnail-preview');
+            const thumbDrop = document.getElementById('thumbnail-drop');
+
+            thumbInput.addEventListener('change', () => {
+                if (thumbInput.files.length) {
+                    const reader = new FileReader();
+                    reader.onload = e => {
+                        document.getElementById('thumbnail-preview-img').src = e.target.result;
+                        thumbPreview.classList.add('visible');
+                        thumbDrop.style.display = 'none';
+                    };
+                    reader.readAsDataURL(thumbInput.files[0]);
+                }
+            });
+            document.getElementById('thumbnail-remove').addEventListener('click', () => {
+                thumbInput.value = '';
+                thumbPreview.classList.remove('visible');
+                thumbDrop.style.display = '';
+            });
+
+            // ── FORM SUBMIT ──────────────────
+            document.getElementById('upload-form').addEventListener('submit', async e => {
+                e.preventDefault();
+                const title = document.getElementById('video-title').value.trim();
+                if (!title) {
+                    showToast('Please enter a title', 'error');
+                    return;
+                }
+                if (!selectedVideoFile) {
+                    showToast('Please select a video file', 'error');
+                    return;
+                }
+
+                // Simulate upload progress
+                const progress = document.getElementById('upload-progress');
+                const fill = document.getElementById('progress-fill');
+                const text = document.getElementById('progress-text');
+                progress.classList.add('visible');
+
+                let pct = 0;
+                const interval = setInterval(() => {
+                    pct += Math.random() * 15 + 5;
+                    if (pct >= 100) {
+                        pct = 100;
+                        clearInterval(interval);
+                        fill.style.width = '100%';
+                        text.textContent = 'Upload complete!';
+                        showToast('Video published successfully!', 'success');
+                        setTimeout(() => { window.location.href = '/home.html'; }, 1500);
+                    } else {
+                        fill.style.width = pct + '%';
+                        text.textContent = `Uploading... ${Math.floor(pct)}%`;
+                    }
+                }, 300);
+            });
+        }
+    </script>
+</body>
+</html>

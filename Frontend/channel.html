@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Channel — ViewTube</title>
+    <meta name="description" content="View channel profile, videos, and subscriber info on ViewTube." />
+    <link rel="stylesheet" href="css/global.css" />
+    <style>
+        /* ── CHANNEL BANNER ────────────────── */
+        .channel-banner {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-secondary) 100%);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            position: relative;
+        }
+        .channel-banner img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* ── CHANNEL HEADER ────────────────── */
+        .channel-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+            padding: 20px 0 24px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 24px;
+        }
+        .channel-header__avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--bg-primary);
+            margin-top: -44px;
+            position: relative;
+            z-index: 1;
+            box-shadow: var(--shadow-md);
+        }
+        .channel-header__info {
+            flex: 1;
+        }
+        .channel-header__name {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        .channel-header__meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+        .channel-header__bio {
+            font-size: 0.88rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+        }
+        .channel-header__actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin-top: 8px;
+        }
+
+        /* ── CHANNEL TABS ──────────────────── */
+        .channel-tabs {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 24px;
+            border-bottom: 1px solid var(--border);
+        }
+        .channel-tab {
+            padding: 12px 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all var(--transition-fast);
+        }
+        .channel-tab:hover {
+            color: var(--text-primary);
+        }
+        .channel-tab.active {
+            color: var(--text-primary);
+            border-bottom-color: var(--accent);
+        }
+
+        /* ── VIDEO GRID ────────────────────── */
+        .channel-videos {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        .video-card {
+            display: block;
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+        }
+        .video-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+        .video-card__thumbnail {
+            position: relative;
+            aspect-ratio: 16/9;
+            background: var(--bg-tertiary);
+            overflow: hidden;
+        }
+        .video-card__thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform var(--transition-normal);
+        }
+        .video-card:hover .video-card__thumbnail img {
+            transform: scale(1.05);
+        }
+        .video-card__duration {
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
+            background: rgba(0,0,0,0.85);
+            color: #fff;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .video-card__play-overlay {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0,0,0,0.3);
+            opacity: 0;
+            transition: opacity var(--transition-fast);
+        }
+        .video-card:hover .video-card__play-overlay { opacity: 1; }
+        .video-card__play-btn {
+            width: 48px;
+            height: 48px;
+            background: var(--accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 20px rgba(255,68,68,0.5);
+        }
+        .video-card__play-btn svg {
+            width: 20px;
+            height: 20px;
+            fill: #fff;
+            margin-left: 2px;
+        }
+        .video-card__info {
+            padding: 12px 4px;
+        }
+        .video-card__title {
+            font-size: 0.92rem;
+            font-weight: 600;
+            line-height: 1.3;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            margin-bottom: 6px;
+        }
+        .video-card__stats {
+            display: flex;
+            gap: 6px;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+
+        /* ── EMPTY STATE ───────────────────── */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+        }
+        .empty-state svg {
+            width: 64px;
+            height: 64px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+        .empty-state h3 {
+            margin-bottom: 8px;
+        }
+        .empty-state p {
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .channel-banner { height: 140px; }
+            .channel-header {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+            .channel-header__avatar { margin-top: -36px; }
+            .channel-header__meta { justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+    <script src="js/auth.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/components.js"></script>
+    <script>
+        renderNavbar();
+        renderSidebar('your-videos');
+
+        const main = document.createElement('main');
+        main.className = 'main-content';
+        document.body.appendChild(main);
+
+        const params = new URLSearchParams(window.location.search);
+        const username = params.get('u');
+        const user = Auth.getUser();
+
+        // Determine whose channel to show
+        const isOwnChannel = !username || username === user?.username;
+        const channelUser = isOwnChannel ? user : {
+            fullname: username ? username.charAt(0).toUpperCase() + username.slice(1) : 'Creator',
+            username: username || 'creator',
+            avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(username || 'Creator')}&background=6366f1&color=fff&size=160`,
+            coverImage: null
+        };
+
+        const channelVideos = username
+            ? MOCK_VIDEOS.filter(v => v.owner.username === username)
+            : MOCK_VIDEOS.slice(0, 4);
+
+        document.title = `${channelUser?.fullname || channelUser?.username} — ViewTube`;
+
+        const coverSrc = channelUser?.coverImage || '';
+        const avatarSrc = channelUser?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(channelUser?.fullname || 'U')}&background=ff4444&color=fff&size=160`;
+
+        main.innerHTML = `
+            <div class="channel-banner">
+                ${coverSrc ? `<img src="${coverSrc}" alt="Channel banner" />` : ''}
+            </div>
+
+            <div class="channel-header">
+                <img src="${avatarSrc}" alt="${channelUser?.fullname}" class="channel-header__avatar" />
+                <div class="channel-header__info">
+                    <div class="channel-header__name">${channelUser?.fullname || channelUser?.username}</div>
+                    <div class="channel-header__meta">
+                        <span>@${channelUser?.username}</span>
+                        <span>•</span>
+                        <span>${channelVideos.length} videos</span>
+                        <span>•</span>
+                        <span>${Math.floor(Math.random() * 200 + 5)}K subscribers</span>
+                    </div>
+                    <div class="channel-header__bio">Creating content about web development, design, and technology.</div>
+                    <div class="channel-header__actions">
+                        ${isOwnChannel
+                            ? `<a href="/settings.html" class="btn btn-secondary">Edit Channel</a>
+                               <a href="/upload.html" class="btn btn-primary">Upload Video</a>`
+                            : `<button class="subscribe-btn" onclick="
+                                    if(this.textContent==='Subscribe'){
+                                        this.textContent='Subscribed';
+                                        this.style.background='var(--bg-tertiary)';
+                                        this.style.color='var(--text-secondary)';
+                                    } else {
+                                        this.textContent='Subscribe';
+                                        this.style.background='';
+                                        this.style.color='';
+                                    }
+                                " style="padding:10px 24px;border-radius:var(--radius-full);background:var(--text-primary);color:var(--text-inverse);font-weight:600;font-size:0.9rem;cursor:pointer;">Subscribe</button>`
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <div class="channel-tabs">
+                <div class="channel-tab active">Videos</div>
+                <div class="channel-tab">About</div>
+            </div>
+
+            <div class="channel-videos" id="channel-videos-grid">
+                ${channelVideos.length > 0
+                    ? channelVideos.map(v => `
+                        <a href="/watch.html?v=${v._id}" class="video-card">
+                            <div class="video-card__thumbnail">
+                                <img src="${v.thumbnail}" alt="${v.title}" loading="lazy" />
+                                <span class="video-card__duration">${v.duration}</span>
+                                <div class="video-card__play-overlay">
+                                    <div class="video-card__play-btn">${Icons.play}</div>
+                                </div>
+                            </div>
+                            <div class="video-card__info">
+                                <h4 class="video-card__title">${v.title}</h4>
+                                <div class="video-card__stats">
+                                    <span>${formatViews(v.view)} views</span>
+                                    <span>•</span>
+                                    <span>${formatTimeAgo(v.createdAt)}</span>
+                                </div>
+                            </div>
+                        </a>
+                    `).join('')
+                    : `<div class="empty-state">
+                            ${Icons.film}
+                            <h3>No videos yet</h3>
+                            <p>This channel hasn't uploaded any videos.</p>
+                        </div>`
+                }
+            </div>
+        `;
+    </script>
+</body>
+</html>

@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Settings — ViewTube</title>
+    <meta name="description" content="Manage your ViewTube account settings, profile, and preferences." />
+    <link rel="stylesheet" href="css/global.css" />
+    <link rel="stylesheet" href="css/auth.css" />
+    <style>
+        .settings-page {
+            max-width: 740px;
+            margin: 0 auto;
+            animation: fadeInUp 0.5s ease forwards;
+        }
+        .settings-page__header {
+            margin-bottom: 32px;
+        }
+        .settings-page__header h1 {
+            font-size: 1.6rem;
+            margin-bottom: 6px;
+        }
+
+        /* ── SETTINGS SECTIONS ─────────────── */
+        .settings-section {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            padding: 28px;
+            margin-bottom: 20px;
+        }
+        .settings-section__title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        .settings-section__desc {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+        }
+
+        /* ── AVATAR / COVER EDITOR ─────────── */
+        .profile-images {
+            display: flex;
+            gap: 24px;
+            align-items: flex-start;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+        }
+        .profile-avatar-editor {
+            text-align: center;
+        }
+        .profile-avatar-editor img {
+            width: 96px;
+            height: 96px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--border);
+            margin-bottom: 10px;
+            display: block;
+        }
+        .profile-cover-editor {
+            flex: 1;
+            min-width: 200px;
+        }
+        .profile-cover-editor .cover-preview {
+            width: 100%;
+            height: 100px;
+            border-radius: var(--radius-md);
+            object-fit: cover;
+            border: 2px solid var(--border);
+            margin-bottom: 10px;
+            background: var(--bg-tertiary);
+        }
+        .change-photo-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: var(--radius-full);
+            font-size: 0.8rem;
+            font-weight: 500;
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+        .change-photo-btn:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+        .change-photo-btn input { display: none; }
+
+        /* ── SUCCESS INDICATOR ─────────────── */
+        .save-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85rem;
+            color: #22c55e;
+            opacity: 0;
+            transition: opacity var(--transition-normal);
+        }
+        .save-indicator.visible { opacity: 1; }
+
+        /* ── DANGER ZONE ───────────────────── */
+        .danger-zone {
+            border-color: rgba(255, 68, 68, 0.2);
+        }
+        .danger-zone .settings-section__title {
+            color: var(--accent);
+        }
+
+        @media (max-width: 600px) {
+            .settings-section { padding: 20px; }
+            .profile-images { flex-direction: column; align-items: center; }
+        }
+    </style>
+</head>
+<body>
+    <script src="js/auth.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/components.js"></script>
+    <script>
+        if (!Auth.requireAuth()) { /* redirects */ }
+        else {
+            renderNavbar();
+            renderSidebar('settings');
+
+            const main = document.createElement('main');
+            main.className = 'main-content';
+            document.body.appendChild(main);
+
+            const user = Auth.getUser();
+            const avatarUrl = user?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.fullname || 'U')}&background=ff4444&color=fff&size=192`;
+            const coverUrl = user?.coverImage || '';
+
+            main.innerHTML = `
+                <div class="settings-page">
+                    <div class="settings-page__header">
+                        <h1>Settings</h1>
+                        <p>Manage your account and profile</p>
+                    </div>
+
+                    <!-- PROFILE IMAGES -->
+                    <div class="settings-section">
+                        <div class="settings-section__title">Profile Images</div>
+                        <div class="settings-section__desc">Update your avatar and channel cover image</div>
+
+                        <div class="profile-images">
+                            <div class="profile-avatar-editor">
+                                <img src="${avatarUrl}" alt="Avatar" id="settings-avatar" />
+                                <label class="change-photo-btn">
+                                    Change Avatar
+                                    <input type="file" id="avatar-file" accept="image/*" />
+                                </label>
+                            </div>
+                            <div class="profile-cover-editor">
+                                ${coverUrl
+                                    ? `<img src="${coverUrl}" alt="Cover" class="cover-preview" id="settings-cover" />`
+                                    : `<div class="cover-preview" id="settings-cover" style="display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:0.85rem;">No cover image</div>`
+                                }
+                                <label class="change-photo-btn">
+                                    Change Cover
+                                    <input type="file" id="cover-file" accept="image/*" />
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ACCOUNT DETAILS -->
+                    <div class="settings-section">
+                        <div class="settings-section__title">Account Details</div>
+                        <div class="settings-section__desc">Update your personal information</div>
+
+                        <form id="account-form">
+                            <div class="input-group">
+                                <label for="settings-fullname">Full Name</label>
+                                <input type="text" id="settings-fullname" value="${user?.fullname || ''}" />
+                            </div>
+                            <div class="input-group">
+                                <label for="settings-email">Email</label>
+                                <input type="email" id="settings-email" value="${user?.email || ''}" />
+                            </div>
+                            <div class="input-group">
+                                <label for="settings-username">Username</label>
+                                <input type="text" id="settings-username" value="${user?.username || ''}" disabled style="opacity: 0.6; cursor: not-allowed;" />
+                                <div style="font-size:0.78rem;color:var(--text-muted);margin-top:4px;">Username cannot be changed</div>
+                            </div>
+
+                            <div style="display: flex; gap: 12px; align-items: center;">
+                                <button type="submit" class="btn btn-primary" id="save-account-btn">Save Changes</button>
+                                <span class="save-indicator" id="save-indicator">✓ Saved</span>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- CHANGE PASSWORD -->
+                    <div class="settings-section">
+                        <div class="settings-section__title">Change Password</div>
+                        <div class="settings-section__desc">Update your password to keep your account secure</div>
+
+                        <form id="password-form">
+                            <div class="input-group">
+                                <label for="current-password">Current Password</label>
+                                <input type="password" id="current-password" placeholder="Enter current password" />
+                            </div>
+                            <div class="input-group">
+                                <label for="new-password">New Password</label>
+                                <input type="password" id="new-password" placeholder="Enter new password (min 6 chars)" />
+                            </div>
+
+                            <button type="submit" class="btn btn-secondary" id="change-pw-btn">Update Password</button>
+                        </form>
+                    </div>
+
+                    <!-- DANGER ZONE -->
+                    <div class="settings-section danger-zone">
+                        <div class="settings-section__title">Danger Zone</div>
+                        <div class="settings-section__desc">Irreversible actions — proceed with caution</div>
+
+                        <button class="btn btn-secondary" style="border-color: rgba(255,68,68,0.3); color: var(--accent);" id="logout-all-btn">
+                            Sign Out Everywhere
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            // ── AVATAR UPLOAD ────────────────
+            document.getElementById('avatar-file').addEventListener('change', async function() {
+                if (!this.files.length) return;
+                const formData = new FormData();
+                formData.append('avatar', this.files[0]);
+
+                // Preview immediately
+                const reader = new FileReader();
+                reader.onload = e => document.getElementById('settings-avatar').src = e.target.result;
+                reader.readAsDataURL(this.files[0]);
+
+                try {
+                    const data = await api.postForm('/user/update-avatar', formData);
+                    if (data.data) {
+                        const updated = { ...user, avatar: data.data.avatar };
+                        Auth.setUser(updated);
+                        showToast('Avatar updated!', 'success');
+                    }
+                } catch (err) {
+                    showToast(err.message || 'Failed to update avatar', 'error');
+                }
+            });
+
+            // ── COVER UPLOAD ─────────────────
+            document.getElementById('cover-file').addEventListener('change', async function() {
+                if (!this.files.length) return;
+                const formData = new FormData();
+                formData.append('coverImage', this.files[0]);
+
+                const reader = new FileReader();
+                reader.onload = e => {
+                    const cover = document.getElementById('settings-cover');
+                    if (cover.tagName === 'IMG') {
+                        cover.src = e.target.result;
+                    } else {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.alt = 'Cover';
+                        img.className = 'cover-preview';
+                        img.id = 'settings-cover';
+                        cover.replaceWith(img);
+                    }
+                };
+                reader.readAsDataURL(this.files[0]);
+
+                try {
+                    const data = await api.postForm('/user/update-cover', formData);
+                    if (data.data) {
+                        const updated = { ...user, coverImage: data.data.coverImage };
+                        Auth.setUser(updated);
+                        showToast('Cover image updated!', 'success');
+                    }
+                } catch (err) {
+                    showToast(err.message || 'Failed to update cover', 'error');
+                }
+            });
+
+            // ── ACCOUNT DETAILS FORM ─────────
+            document.getElementById('account-form').addEventListener('submit', async e => {
+                e.preventDefault();
+                const fullname = document.getElementById('settings-fullname').value.trim();
+                const email = document.getElementById('settings-email').value.trim();
+
+                if (!fullname || !email) {
+                    showToast('Please fill in all fields', 'error');
+                    return;
+                }
+
+                try {
+                    const data = await api.patch('/user/update-account', { fullname, email });
+                    const updated = { ...user, fullname, email };
+                    Auth.setUser(updated);
+
+                    const indicator = document.getElementById('save-indicator');
+                    indicator.classList.add('visible');
+                    setTimeout(() => indicator.classList.remove('visible'), 2500);
+                    showToast('Account updated!', 'success');
+                } catch (err) {
+                    showToast(err.message || 'Failed to update account', 'error');
+                }
+            });
+
+            // ── CHANGE PASSWORD ──────────────
+            document.getElementById('password-form').addEventListener('submit', async e => {
+                e.preventDefault();
+                const oldPassword = document.getElementById('current-password').value;
+                const newPassword = document.getElementById('new-password').value;
+
+                if (!oldPassword || !newPassword) {
+                    showToast('Please fill in both fields', 'error');
+                    return;
+                }
+                if (newPassword.length < 6) {
+                    showToast('New password must be at least 6 characters', 'error');
+                    return;
+                }
+
+                try {
+                    await api.post('/user/change-password', { oldPassword, newPassword });
+                    showToast('Password changed successfully!', 'success');
+                    document.getElementById('current-password').value = '';
+                    document.getElementById('new-password').value = '';
+                } catch (err) {
+                    showToast(err.message || 'Failed to change password', 'error');
+                }
+            });
+
+            // ── LOGOUT EVERYWHERE ────────────
+            document.getElementById('logout-all-btn').addEventListener('click', async () => {
+                try {
+                    await api.post('/user/logout');
+                } catch { /* ignore */ }
+                Auth.logout();
+                window.location.href = '/index.html';
+            });
+        }
+    </script>
+</body>
+</html>
