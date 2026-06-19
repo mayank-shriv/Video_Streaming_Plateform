@@ -1,0 +1,45 @@
+/* ═══════════════════════════════════════════
+   LAYOUT — App Shell
+   ═══════════════════════════════════════════ */
+
+.layout {
+    min-height: 100vh;
+    background: var(--bg-primary);
+}
+
+.mainContent {
+    margin-top: var(--navbar-height);
+    margin-left: var(--sidebar-width);
+    min-height: calc(100vh - var(--navbar-height));
+    padding: 24px;
+    transition: margin-left var(--transition-slow);
+}
+
+/* Sidebar collapsed → shrink margin */
+.mainContentCollapsed {
+    margin-left: var(--sidebar-collapsed);
+}
+
+/* ═══════════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════════ */
+@media (max-width: 1024px) {
+    .mainContent,
+    .mainContentCollapsed {
+        margin-left: 0;
+    }
+}
+
+@media (max-width: 768px) {
+    .mainContent,
+    .mainContentCollapsed {
+        padding: 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .mainContent,
+    .mainContentCollapsed {
+        padding: 12px 8px;
+    }
+}

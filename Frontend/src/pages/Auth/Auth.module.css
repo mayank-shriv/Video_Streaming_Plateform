@@ -1,0 +1,606 @@
+/* ═══════════════════════════════════════════
+   AUTH PAGES — SHARED STYLES
+   ═══════════════════════════════════════════ */
+
+/* ── Keyframes ─────────────────────────── */
+@keyframes pulseBlob {
+    0%   { transform: translate(-50%, -50%) scale(1);   opacity: 0.35; }
+    50%  { transform: translate(-50%, -50%) scale(1.35); opacity: 0.18; }
+    100% { transform: translate(-50%, -50%) scale(1);   opacity: 0.35; }
+}
+
+@keyframes scaleIn {
+    from { opacity: 0; transform: scale(0.92) translateY(12px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-12px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes spinLoader {
+    to { transform: rotate(360deg); }
+}
+
+/* ── Page Layout ───────────────────────── */
+.authPage {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 40px 20px;
+    background: var(--bg-primary);
+    overflow: hidden;
+}
+
+/* ── Animated Background Blobs ─────────── */
+.blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(100px);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.blobRed {
+    composes: blob;
+    width: 500px;
+    height: 500px;
+    top: 10%;
+    left: 15%;
+    background: radial-gradient(circle, rgba(255, 68, 68, 0.45) 0%, transparent 70%);
+    animation: pulseBlob 8s ease-in-out infinite alternate;
+}
+
+.blobPurple {
+    composes: blob;
+    width: 450px;
+    height: 450px;
+    bottom: 5%;
+    right: 10%;
+    background: radial-gradient(circle, rgba(136, 71, 255, 0.35) 0%, transparent 70%);
+    animation: pulseBlob 10s ease-in-out infinite alternate-reverse;
+}
+
+/* ── Glass Card ────────────────────────── */
+.authCard {
+    position: relative;
+    z-index: 1;
+    max-width: 480px;
+    width: 90%;
+    background: rgba(26, 26, 26, 0.6);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
+    padding: 48px;
+    box-shadow: var(--shadow-lg);
+    animation: scaleIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* ── Logo Section ──────────────────────── */
+.logoSection {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 32px;
+}
+
+.logoIcon {
+    width: 56px;
+    height: 56px;
+    border-radius: var(--radius-lg);
+    background: var(--accent-gradient);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+    box-shadow: 0 0 24px rgba(255, 68, 68, 0.3);
+}
+
+.logoIcon svg {
+    width: 28px;
+    height: 28px;
+    fill: #ffffff;
+}
+
+.logoName {
+    font-size: 1.5rem;
+    font-weight: 800;
+    background: var(--accent-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.5px;
+}
+
+/* ── Header ────────────────────────────── */
+.header {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.header h1 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+    line-height: 1.25;
+}
+
+.header p {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+}
+
+/* ── Form ──────────────────────────────── */
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+/* ── Input Group ───────────────────────── */
+.inputGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.inputGroup label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+}
+
+.inputWrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.inputWrapper input {
+    width: 100%;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 12px 16px;
+    font-size: 0.95rem;
+    color: var(--text-primary);
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.inputWrapper input::placeholder {
+    color: var(--text-muted);
+}
+
+.inputWrapper input:focus {
+    border-color: var(--border-focus);
+    box-shadow: 0 0 0 3px rgba(255, 68, 68, 0.12);
+}
+
+/* ── Password Toggle ───────────────────── */
+.eyeToggle {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-sm);
+    color: var(--text-muted);
+    transition: color var(--transition-fast), background var(--transition-fast);
+    cursor: pointer;
+}
+
+.eyeToggle:hover {
+    color: var(--text-primary);
+    background: var(--bg-glass-hover);
+}
+
+.inputWrapper input[type="password"] + .eyeToggle,
+.inputWrapper input[type="text"] + .eyeToggle {
+    /* ensures space for icon */
+}
+
+.inputWrapper:has(.eyeToggle) input {
+    padding-right: 50px;
+}
+
+/* ── Submit Button ─────────────────────── */
+.submitBtn {
+    width: 100%;
+    padding: 14px;
+    border-radius: var(--radius-md);
+    background: var(--accent-gradient);
+    color: #ffffff;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    cursor: pointer;
+    border: none;
+    transition: opacity var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 6px;
+}
+
+.submitBtn:hover:not(:disabled) {
+    opacity: 0.92;
+    box-shadow: var(--accent-glow);
+    transform: translateY(-1px);
+}
+
+.submitBtn:active:not(:disabled) {
+    transform: translateY(0) scale(0.98);
+}
+
+.submitBtn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+/* ── Loading Spinner ───────────────────── */
+.spinner {
+    width: 20px;
+    height: 20px;
+    border: 2.5px solid rgba(255, 255, 255, 0.25);
+    border-top-color: #ffffff;
+    border-radius: 50%;
+    animation: spinLoader 0.7s linear infinite;
+}
+
+/* ── Back Button (Step 2) ──────────────── */
+.backBtn {
+    width: 100%;
+    padding: 14px;
+    border-radius: var(--radius-md);
+    background: var(--bg-tertiary);
+    color: var(--text-secondary);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.backBtn:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+.buttonRow {
+    display: flex;
+    gap: 12px;
+}
+
+.buttonRow .backBtn {
+    flex: 1;
+}
+
+.buttonRow .submitBtn {
+    flex: 2;
+    margin-top: 0;
+}
+
+/* ── Footer ────────────────────────────── */
+.footer {
+    text-align: center;
+    margin-top: 28px;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.footer a,
+.footerLink {
+    color: var(--accent);
+    font-weight: 600;
+    text-decoration: none;
+    transition: color var(--transition-fast);
+}
+
+.footer a:hover,
+.footerLink:hover {
+    color: var(--accent-hover);
+    text-decoration: underline;
+}
+
+/* ── Alert ─────────────────────────────── */
+.alert {
+    padding: 12px 16px;
+    border-radius: var(--radius-md);
+    font-size: 0.88rem;
+    font-weight: 500;
+    animation: fadeInDown 0.35s ease forwards;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    line-height: 1.45;
+}
+
+.alertError {
+    composes: alert;
+    background: rgba(255, 68, 68, 0.1);
+    border-left: 3px solid var(--accent);
+    color: #ff8888;
+}
+
+.alertSuccess {
+    composes: alert;
+    background: rgba(34, 197, 94, 0.1);
+    border-left: 3px solid var(--success);
+    color: #6ee7a0;
+}
+
+.alertIcon {
+    flex-shrink: 0;
+    font-size: 1.15rem;
+}
+
+/* ── Divider ───────────────────────────── */
+.divider {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 4px 0;
+}
+
+.divider::before,
+.divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+}
+
+.divider span {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+
+/* ═══════════════════════════════════════════
+   STEP INDICATOR (Register)
+   ═══════════════════════════════════════════ */
+.stepIndicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 32px;
+}
+
+.step {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.stepCircle {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    font-weight: 700;
+    background: var(--bg-tertiary);
+    color: var(--text-muted);
+    border: 2px solid var(--border);
+    transition: all var(--transition-normal);
+    flex-shrink: 0;
+}
+
+.stepLabel {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    transition: color var(--transition-normal);
+}
+
+.stepConnector {
+    width: 48px;
+    height: 2px;
+    background: var(--border);
+    margin: 0 12px;
+    border-radius: 1px;
+    transition: background var(--transition-normal);
+    flex-shrink: 0;
+}
+
+/* Active step */
+.stepActive .stepCircle {
+    background: var(--accent-gradient);
+    color: #ffffff;
+    border-color: transparent;
+    box-shadow: 0 0 16px rgba(255, 68, 68, 0.35);
+}
+
+.stepActive .stepLabel {
+    color: var(--text-primary);
+}
+
+/* Completed step */
+.stepCompleted .stepCircle {
+    background: var(--success);
+    color: #ffffff;
+    border-color: transparent;
+}
+
+.stepCompleted .stepLabel {
+    color: var(--success);
+}
+
+.stepConnectorActive {
+    background: var(--accent);
+}
+
+/* ═══════════════════════════════════════════
+   FILE UPLOAD AREA
+   ═══════════════════════════════════════════ */
+.uploadArea {
+    position: relative;
+    border: 2px dashed var(--border);
+    border-radius: var(--radius-lg);
+    min-height: 120px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 24px 16px;
+    cursor: pointer;
+    transition: border-color var(--transition-fast), background var(--transition-fast), box-shadow var(--transition-fast);
+    text-align: center;
+    overflow: hidden;
+}
+
+.uploadArea:hover {
+    border-color: rgba(255, 255, 255, 0.15);
+    background: var(--bg-glass);
+    box-shadow: 0 0 20px rgba(255, 68, 68, 0.06);
+}
+
+.uploadAreaDragover {
+    border-color: var(--accent) !important;
+    border-style: solid !important;
+    background: rgba(255, 68, 68, 0.06) !important;
+    box-shadow: 0 0 30px rgba(255, 68, 68, 0.12);
+}
+
+.uploadAreaHasFile {
+    border-color: var(--success);
+    border-style: solid;
+}
+
+.uploadIcon {
+    font-size: 2rem;
+    color: var(--text-muted);
+    transition: color var(--transition-fast);
+}
+
+.uploadArea:hover .uploadIcon {
+    color: var(--accent);
+}
+
+.uploadText {
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+    line-height: 1.4;
+}
+
+.uploadText strong {
+    color: var(--accent);
+}
+
+.uploadHint {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.uploadInput {
+    display: none;
+}
+
+/* ── File Preview ──────────────────────── */
+.filePreview {
+    position: relative;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.filePreview img {
+    max-height: 110px;
+    max-width: 100%;
+    border-radius: var(--radius-md);
+    object-fit: cover;
+}
+
+.removeFile {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    cursor: pointer;
+    border: 2px solid var(--bg-secondary);
+    transition: transform var(--transition-fast), background var(--transition-fast);
+    z-index: 2;
+}
+
+.removeFile:hover {
+    transform: scale(1.15);
+    background: #ff2222;
+}
+
+/* ═══════════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════════ */
+@media (max-width: 480px) {
+    .authCard {
+        padding: 32px 24px;
+        border-radius: var(--radius-lg);
+    }
+
+    .header h1 {
+        font-size: 1.4rem;
+    }
+
+    .header p {
+        font-size: 0.88rem;
+    }
+
+    .logoIcon {
+        width: 48px;
+        height: 48px;
+    }
+
+    .logoName {
+        font-size: 1.3rem;
+    }
+
+    .stepLabel {
+        display: none;
+    }
+
+    .stepConnector {
+        width: 36px;
+        margin: 0 8px;
+    }
+
+    .blobRed,
+    .blobPurple {
+        width: 300px;
+        height: 300px;
+    }
+
+    .buttonRow {
+        flex-direction: column-reverse;
+    }
+
+    .buttonRow .backBtn,
+    .buttonRow .submitBtn {
+        flex: unset;
+    }
+}

@@ -1,0 +1,181 @@
+/* ═══════════════════════════════════════════
+   VIDEO CARD
+   ═══════════════════════════════════════════ */
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  animation: fadeIn 0.4s ease forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ═══════════════════════════════════════════
+   THUMBNAIL
+   ═══════════════════════════════════════════ */
+.thumbnailLink {
+  display: block;
+  text-decoration: none;
+}
+
+.thumbnailContainer {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--bg-tertiary);
+  transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+}
+
+.card:hover .thumbnailContainer {
+  transform: scale(1.02);
+  box-shadow: var(--shadow-md);
+}
+
+.thumbnail {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--transition-slow);
+}
+
+.card:hover .thumbnail {
+  transform: scale(1.05);
+}
+
+/* Play overlay */
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.6) 0%,
+    rgba(0, 0, 0, 0) 50%
+  );
+  opacity: 0;
+  transition: opacity var(--transition-normal);
+}
+
+.card:hover .overlay {
+  opacity: 1;
+}
+
+.playIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(8px);
+  color: #ffffff;
+  font-size: 1.4rem;
+  transform: scale(0.8);
+  transition: transform var(--transition-normal), background var(--transition-fast);
+}
+
+.card:hover .playIcon {
+  transform: scale(1);
+}
+
+.playIcon:hover {
+  background: rgba(255, 68, 68, 0.8);
+}
+
+/* Duration badge */
+.duration {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  padding: 2px 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #ffffff;
+  background: rgba(0, 0, 0, 0.82);
+  border-radius: 4px;
+  line-height: 1.3;
+  letter-spacing: 0.3px;
+  pointer-events: none;
+}
+
+/* ═══════════════════════════════════════════
+   INFO SECTION
+   ═══════════════════════════════════════════ */
+.info {
+  display: flex;
+  gap: 12px;
+  padding: 0 4px;
+}
+
+.avatarLink {
+  flex-shrink: 0;
+  text-decoration: none;
+  margin-top: 2px;
+}
+
+.details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.titleLink {
+  text-decoration: none;
+}
+
+.title {
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin: 0;
+  transition: color var(--transition-fast);
+}
+
+.titleLink:hover .title {
+  color: var(--accent-hover);
+}
+
+.channelName {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+  line-height: 1.3;
+}
+
+.channelName:hover {
+  color: var(--text-primary);
+  text-decoration: underline;
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.dot {
+  font-size: 0.5rem;
+  opacity: 0.7;
+}

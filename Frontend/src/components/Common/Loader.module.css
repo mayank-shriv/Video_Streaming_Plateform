@@ -1,0 +1,67 @@
+/* ═══════════════════════════════════════════
+   SKELETON CARD
+   ═══════════════════════════════════════════ */
+.skeletonCard {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.skeletonThumbnail {
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius-md);
+  width: 100%;
+}
+
+.skeletonInfo {
+  display: flex;
+  gap: 12px;
+  padding: 0 4px;
+}
+
+.skeletonAvatar {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+}
+
+.skeletonText {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 2px;
+}
+
+.skeletonLine {
+  height: 12px;
+  border-radius: var(--radius-sm);
+}
+
+.lineTitle {
+  width: 90%;
+  height: 14px;
+}
+
+.lineTitleShort {
+  width: 60%;
+  height: 14px;
+}
+
+.lineMeta {
+  width: 45%;
+  height: 11px;
+  margin-top: 2px;
+}
+
+/* ═══════════════════════════════════════════
+   PAGE LOADER
+   ═══════════════════════════════════════════ */
+.pageLoader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  width: 100%;
+}

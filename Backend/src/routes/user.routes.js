@@ -10,8 +10,12 @@ import {
     updateAccountDetails,
     updateUserAvatar,
     updateUserCoverAvatar,
-    getUserChannelProfile
+    getUserChannelProfile,
+    getWatchHistory,
+    clearWatchHistory
 } from "../controllers/user.controller.js";
+
+import { getNotifications, markAllAsRead } from "../controllers/notification.controller.js";
 
 import { upload } from "../middlewares/multer.middlewares.js"
 
@@ -46,5 +50,12 @@ router.route("/update-account").patch(verifyJwt, updateAccountDetails)
 router.route("/update-avatar").patch(verifyJwt, upload.single("avatar"), updateUserAvatar)
 router.route("/update-cover").patch(verifyJwt, upload.single("coverImage"), updateUserCoverAvatar)
 router.route("/channel/:username").get(getUserChannelProfile)
+
+// Watch history
+router.route("/history").get(verifyJwt, getWatchHistory).delete(verifyJwt, clearWatchHistory)
+
+// Notifications
+router.route("/notifications").get(verifyJwt, getNotifications)
+router.route("/notifications/read").patch(verifyJwt, markAllAsRead)
 
 export default router;

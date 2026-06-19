@@ -45,12 +45,9 @@ const registerUser = asyncHandler(async (req, res) => {
     }
 
     const coverImageLocalPath = req.files?.coverImage?.[0]?.path;
-    if (!coverImageLocalPath) {
-        console.error("Cover image file is missing in the request:", req.files);
-        throw new ApiError(400, "Cover image file is required. Please upload a valid file.");
-    }
+
     const avatar = await uploadOnCloudinary(avatarLocalPath);
-    const coverImage = await uploadOnCloudinary(coverImageLocalPath);
+    const coverImage = coverImageLocalPath ? await uploadOnCloudinary(coverImageLocalPath) : null;
     if (!avatar) {
         throw new ApiError(400, "Avatar file is required")
     }
@@ -70,7 +67,7 @@ const registerUser = asyncHandler(async (req, res) => {
         throw new ApiError(500, "Something went wrong while registering the user")
     }
     return res.status(201).json(
-        new ApiResponse(200, createdUser, "User Registered Successfully")
+        new ApiResponse(201, createdUser, "User Registered Successfully")
     )
 }
 )
@@ -100,7 +97,7 @@ const loginUser = asyncHandler(async (req, res) => {
 
     const options = {
         httpOnly: true,
-        secure: true
+        secure: process.env.NODE_ENV === "production"
     }
     return res
         .status(200)
@@ -120,10 +117,9 @@ const loginUser = asyncHandler(async (req, res) => {
 const logOutUser = asyncHandler(async (req, res) => {
     await User.findByIdAndUpdate(
         req.user._id, {
-        $set: {
-            refreshToken: undefined
+        $unset: {
+            refreshToken: 1
         }
-
     },
         {
             new: true
@@ -131,7 +127,7 @@ const logOutUser = asyncHandler(async (req, res) => {
     )
     const options = {
         httpOnly: true,
-        secure: true
+        secure: process.env.NODE_ENV === "production"
     }
     return res
         .status(200)
@@ -326,7 +322,7 @@ const getUserChannelProfile = asyncHandler(async (req,res) => {
         },
         {
                 $project:{
-                    fullName : 1,
+                    fullname : 1,
                     username :1,
                     subscribersCount :1,
                     channelSubscribedToCount: 1,
@@ -346,7 +342,27 @@ const getUserChannelProfile = asyncHandler(async (req,res) => {
     .json(new ApiResponse(200, channel[0], "User channel fetched successfully"))
 })
 
+const getWatchHistory = asyncHandler(async (req, res) => {
+    const user = await User.findById(req.user._id).populate({
+        path: "watchHistory",
+        populate: { path: "owner", select: "fullname username avatar" }
+    })
+
+    return res
+        .status(200)
+        .json(new ApiResponse(200, user.watchHistory, "Watch history fetched successfully"))
+})
+
+const clearWatchHistory = asyncHandler(async (req, res) => {
+    await User.findByIdAndUpdate(req.user._id, { $set: { watchHistory: [] } })
+
+    return res
+        .status(200)
+        .json(new ApiResponse(200, {}, "Watch history cleared"))
+})
+
 export {
     registerUser, loginUser, logOutUser, refreshAccessToken,
-    changePassword, getCurrentUser, updateAccountDetails, updateUserAvatar, updateUserCoverAvatar,getUserChannelProfile
+    changePassword, getCurrentUser, updateAccountDetails, updateUserAvatar, updateUserCoverAvatar, getUserChannelProfile,
+    getWatchHistory, clearWatchHistory
 }

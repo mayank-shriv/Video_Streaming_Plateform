@@ -1,0 +1,444 @@
+/* ═══════════════════════════════════════════
+   Channel Page Styles
+   ═══════════════════════════════════════════ */
+
+.page {
+  min-height: calc(100vh - var(--navbar-height, 64px));
+  animation: fadeIn 0.4s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ── Loading / Error ── */
+.loadingContainer,
+.errorContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  gap: 16px;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--bg-tertiary, #252525);
+  border-top-color: var(--accent, #ff4444);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.errorText {
+  color: var(--text-secondary, #aaa);
+  font-size: 1.05rem;
+}
+
+.retryBtn {
+  padding: 10px 24px;
+  background: var(--bg-tertiary, #252525);
+  border: 1px solid var(--border, rgba(255, 255, 255, 0.08));
+  border-radius: var(--radius-md, 10px);
+  color: var(--text-primary, #fff);
+  font-size: 0.9rem;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all var(--transition-fast, 0.15s ease);
+}
+
+.retryBtn:hover {
+  background: var(--bg-hover, #2a2a2a);
+}
+
+/* ── Cover Banner ── */
+.banner {
+  width: 100%;
+  height: 200px;
+  position: relative;
+  overflow: hidden;
+  border-radius: 0 0 var(--radius-xl, 24px) var(--radius-xl, 24px);
+}
+
+.coverImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.coverFallback {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+}
+
+.bannerOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(15, 15, 15, 0.6) 0%, transparent 60%);
+}
+
+/* ── Channel Header ── */
+.channelHeader {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  align-items: flex-end;
+  gap: 20px;
+  margin-top: -40px;
+  position: relative;
+  z-index: 2;
+}
+
+.avatarWrapper {
+  flex-shrink: 0;
+}
+
+.avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 4px solid var(--bg-primary, #0f0f0f);
+  object-fit: cover;
+  background: var(--bg-tertiary, #252525);
+}
+
+.channelInfo {
+  flex: 1;
+  min-width: 0;
+  padding-bottom: 4px;
+}
+
+.channelName {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--text-primary, #fff);
+  margin: 0;
+  line-height: 1.2;
+}
+
+.channelUsername {
+  font-size: 0.9rem;
+  color: var(--text-muted, #717171);
+  margin: 2px 0 0;
+}
+
+.channelStats {
+  display: flex;
+  gap: 16px;
+  margin-top: 6px;
+}
+
+.stat {
+  font-size: 0.85rem;
+  color: var(--text-secondary, #aaa);
+}
+
+.stat strong {
+  color: var(--text-primary, #fff);
+  font-weight: 600;
+}
+
+/* ── Action Buttons ── */
+.actions {
+  display: flex;
+  gap: 10px;
+  flex-shrink: 0;
+  padding-bottom: 4px;
+}
+
+.actionBtn {
+  padding: 10px 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: inherit;
+  border-radius: var(--radius-full, 9999px);
+  cursor: pointer;
+  transition: all var(--transition-fast, 0.15s ease);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  border: none;
+  text-decoration: none;
+}
+
+.editBtn {
+  composes: actionBtn;
+  background: var(--bg-tertiary, #252525);
+  color: var(--text-primary, #fff);
+  border: 1px solid var(--border, rgba(255, 255, 255, 0.08));
+}
+
+.editBtn:hover {
+  background: var(--bg-hover, #2a2a2a);
+}
+
+.uploadBtn {
+  composes: actionBtn;
+  background: var(--accent-gradient, linear-gradient(135deg, #ff4444, #ff8800));
+  color: #fff;
+}
+
+.uploadBtn:hover {
+  box-shadow: 0 4px 16px rgba(255, 68, 68, 0.3);
+  transform: translateY(-1px);
+}
+
+.subscribeBtn {
+  composes: actionBtn;
+  background: var(--accent, #ff4444);
+  color: #fff;
+}
+
+.subscribeBtn:hover {
+  background: var(--accent-hover, #ff6666);
+}
+
+.subscribedBtn {
+  composes: actionBtn;
+  background: var(--bg-tertiary, #252525);
+  color: var(--text-primary, #fff);
+  border: 1px solid var(--border, rgba(255, 255, 255, 0.08));
+}
+
+.subscribedBtn:hover {
+  background: var(--bg-hover, #2a2a2a);
+}
+
+/* ── Tabs ── */
+.tabBar {
+  max-width: 1200px;
+  margin: 24px auto 0;
+  padding: 0 24px;
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--border, rgba(255, 255, 255, 0.08));
+}
+
+.tab {
+  padding: 14px 24px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--text-secondary, #aaa);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all var(--transition-fast, 0.15s ease);
+  position: relative;
+}
+
+.tab:hover {
+  color: var(--text-primary, #fff);
+}
+
+.tabActive {
+  composes: tab;
+  color: var(--text-primary, #fff);
+  border-bottom-color: var(--accent, #ff4444);
+}
+
+/* ── Tab Content ── */
+.tabContent {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+  animation: tabFadeIn 0.3s ease;
+}
+
+@keyframes tabFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.emptyState {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-muted, #717171);
+}
+
+.emptyIcon {
+  font-size: 3rem;
+  margin-bottom: 12px;
+  display: block;
+}
+
+.emptyText {
+  font-size: 1rem;
+}
+
+/* ── Playlist Grid ── */
+.playlistGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.playlistCard {
+  background: var(--bg-secondary, #1a1a1a);
+  border: 1px solid var(--border, rgba(255, 255, 255, 0.08));
+  border-radius: var(--radius-lg, 16px);
+  overflow: hidden;
+  cursor: pointer;
+  transition: all var(--transition-normal, 0.25s ease);
+  text-decoration: none;
+  color: inherit;
+}
+
+.playlistCard:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent, #ff4444);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.playlistThumbnail {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  background: var(--bg-tertiary, #252525);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.playlistThumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.playlistPlaceholder {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: var(--bg-tertiary, #252525);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted, #717171);
+  font-size: 2rem;
+}
+
+.playlistInfo {
+  padding: 14px 16px;
+}
+
+.playlistName {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary, #fff);
+  margin: 0 0 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.playlistCount {
+  font-size: 0.85rem;
+  color: var(--text-muted, #717171);
+}
+
+/* ── About Tab ── */
+.aboutContent {
+  max-width: 600px;
+}
+
+.aboutSection {
+  margin-bottom: 28px;
+}
+
+.aboutLabel {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted, #717171);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 8px;
+}
+
+.aboutText {
+  font-size: 0.95rem;
+  color: var(--text-secondary, #aaa);
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+/* ═══ Responsive ═══ */
+@media (max-width: 768px) {
+  .banner {
+    height: 150px;
+  }
+
+  .channelHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    margin-top: -30px;
+  }
+
+  .avatar {
+    width: 64px;
+    height: 64px;
+  }
+
+  .channelName {
+    font-size: 1.3rem;
+  }
+
+  .actions {
+    width: 100%;
+  }
+
+  .actionBtn {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .tabBar {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .tab,
+  .tabActive {
+    padding: 12px 18px;
+    font-size: 0.9rem;
+  }
+
+  .playlistGrid {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .banner {
+    height: 120px;
+    border-radius: 0;
+  }
+
+  .channelHeader {
+    padding: 0 16px;
+  }
+
+  .channelStats {
+    flex-wrap: wrap;
+    gap: 8px 16px;
+  }
+
+  .tabContent {
+    padding: 16px;
+  }
+
+  .playlistGrid {
+    grid-template-columns: 1fr;
+  }
+}

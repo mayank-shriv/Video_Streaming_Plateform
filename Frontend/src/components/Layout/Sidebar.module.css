@@ -1,0 +1,263 @@
+/* ═══════════════════════════════════════════
+   SIDEBAR — Collapsible Navigation
+   ═══════════════════════════════════════════ */
+
+.sidebar {
+    position: fixed;
+    top: var(--navbar-height);
+    left: 0;
+    width: var(--sidebar-width);
+    height: calc(100vh - var(--navbar-height));
+    background: var(--bg-primary);
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 12px 8px;
+    z-index: 900;
+    transition: width var(--transition-slow), padding var(--transition-slow);
+}
+
+/* Scrollbar inside sidebar */
+.sidebar::-webkit-scrollbar {
+    width: 4px;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-full);
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+    background: var(--text-muted);
+}
+
+/* ─── Collapsed State ─── */
+.collapsed {
+    width: var(--sidebar-collapsed);
+    padding: 12px 6px;
+}
+
+/* ─── Sections ─── */
+.section {
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+}
+
+.section:last-child {
+    border-bottom: none;
+}
+
+.sectionTitle {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--text-muted);
+    padding: 8px 12px 6px;
+    transition: opacity var(--transition-fast);
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.collapsed .sectionTitle {
+    opacity: 0;
+    height: 0;
+    padding: 0;
+    margin: 0;
+    overflow: hidden;
+}
+
+/* ─── Nav Items ─── */
+.navItem {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-weight: 400;
+    transition: all var(--transition-fast);
+    cursor: pointer;
+    text-decoration: none;
+    white-space: nowrap;
+    overflow: hidden;
+    position: relative;
+}
+
+.navItem:hover {
+    background: var(--bg-glass);
+    color: var(--text-primary);
+}
+
+.navItem.active {
+    background: var(--bg-glass-hover);
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+.navItem.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 20px;
+    background: var(--accent);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+
+.navIcon {
+    font-size: 20px;
+    flex-shrink: 0;
+    transition: color var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+}
+
+.navItem.active .navIcon {
+    color: var(--accent);
+}
+
+.navLabel {
+    transition: opacity var(--transition-fast), width var(--transition-fast);
+    overflow: hidden;
+}
+
+/* Collapsed: hide labels */
+.collapsed .navItem {
+    justify-content: center;
+    padding: 12px;
+    gap: 0;
+}
+
+.collapsed .navLabel {
+    opacity: 0;
+    width: 0;
+    overflow: hidden;
+}
+
+.collapsed .navItem.active::before {
+    display: none;
+}
+
+/* ─── Tooltip for collapsed state ─── */
+.collapsed .navItem {
+    position: relative;
+}
+
+.collapsed .navItem::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    left: calc(100% + 8px);
+    top: 50%;
+    transform: translateY(-50%);
+    padding: 6px 12px;
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    font-size: 12px;
+    font-weight: 500;
+    border-radius: var(--radius-sm);
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--transition-fast);
+    box-shadow: var(--shadow-sm);
+    z-index: 910;
+}
+
+.collapsed .navItem:hover::after {
+    opacity: 1;
+}
+
+/* ═══════════════════════════════════════════
+   MOBILE OVERLAY + SLIDE-IN
+   ═══════════════════════════════════════════ */
+.overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 899;
+    animation: fadeOverlay 0.25s ease;
+}
+
+@keyframes fadeOverlay {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* ═══════════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════════ */
+@media (max-width: 1024px) {
+    .sidebar {
+        transform: translateX(-100%);
+        width: var(--sidebar-width);
+        z-index: 900;
+        box-shadow: none;
+        transition: transform var(--transition-slow);
+    }
+
+    .collapsed {
+        transform: translateX(-100%);
+        width: var(--sidebar-width);
+    }
+
+    .mobileOpen {
+        transform: translateX(0);
+        box-shadow: var(--shadow-lg);
+    }
+
+    /* Show labels again on mobile (full sidebar) */
+    .mobileOpen .sectionTitle,
+    .mobileOpen.collapsed .sectionTitle {
+        opacity: 1;
+        height: auto;
+        padding: 8px 12px 6px;
+    }
+
+    .mobileOpen .navItem,
+    .mobileOpen.collapsed .navItem {
+        justify-content: flex-start;
+        padding: 10px 12px;
+        gap: 16px;
+    }
+
+    .mobileOpen .navLabel,
+    .mobileOpen.collapsed .navLabel {
+        opacity: 1;
+        width: auto;
+    }
+
+    .mobileOpen .navItem::after,
+    .mobileOpen.collapsed .navItem::after {
+        display: none;
+    }
+
+    .overlay.visible {
+        display: block;
+    }
+}
+
+@media (max-width: 768px) {
+    .sidebar {
+        top: var(--navbar-height);
+        height: calc(100vh - var(--navbar-height));
+    }
+}
+
+@media (max-width: 480px) {
+    .sidebar {
+        width: 260px;
+    }
+
+    .collapsed {
+        width: 260px;
+    }
+}

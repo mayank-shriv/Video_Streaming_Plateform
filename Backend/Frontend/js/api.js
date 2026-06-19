@@ -2,7 +2,7 @@
 // API LAYER — Fetch wrapper with auth support
 // ═══════════════════════════════════════════
 
-const API_BASE = 'http://localhost:3000/api/v1';
+const API_BASE = '/api/v1';
 
 class ApiClient {
     constructor(baseURL) {
