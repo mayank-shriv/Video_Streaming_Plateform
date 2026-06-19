@@ -7,7 +7,8 @@
   "scripts": {
     "start-db": "node ./src/db/index.js",
     "dev": "nodemon src/index.js",
-    "start": "node src/index.js"
+    "start": "node src/index.js",
+    "build": "npm install && cd ../Frontend && npm install && npm run build"
   },
   "keywords": [
     "javascript"

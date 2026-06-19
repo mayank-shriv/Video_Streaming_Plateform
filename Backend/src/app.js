@@ -28,6 +28,15 @@ app.use(express.static("public"));
 
 app.use(cookieParser());
 
+// --- Health Check ---
+app.get("/api/v1/healthcheck", (req, res) => {
+    res.status(200).json({
+        success: true,
+        message: "Video Streaming Platform API is running 🚀",
+        timestamp: new Date().toISOString(),
+    });
+});
+
 // --- API Routes ---
 import userRoutes from "./routes/user.routes.js";
 import videoRoutes from "./routes/video.routes.js";
